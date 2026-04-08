@@ -1,0 +1,62 @@
+{
+  "name": "inkonchain-mcp",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Curated Ink ecosystem MCP server — Sentry Launch Factory, Tsunami V3 DEX, ERC-8004 agent identity, ZNS .ink domains, DailyGM, Tsunami subgraph analytics, Relay cross-chain swaps, and ERC20/WETH utilities. Part of the Ink agent tooling stack alongside tydro-mcp and @nadohq/nado-mcp.",
+  "main": "dist/index.js",
+  "bin": {
+    "inkonchain-mcp": "dist/index.js",
+    "inkonchain-mcp-setup": "dist/setup.js"
+  },
+  "files": [
+    "dist/",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ink",
+    "ink-chain",
+    "inkonchain",
+    "defi",
+    "tsunami",
+    "sentry",
+    "dex",
+    "concentrated-liquidity",
+    "erc-8004",
+    "agent-identity",
+    "zns",
+    "ink-domains",
+    "dailygm",
+    "relay-protocol",
+    "ecosystem"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mavrkofficial/inkonchain-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mavrkofficial/inkonchain-mcp/issues"
+  },
+  "homepage": "https://github.com/mavrkofficial/inkonchain-mcp#readme",
+  "license": "MIT",
+  "author": "MAVRK",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "viem": "^2.28.0",
+    "zns-sdk": "^0.0.6-1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^5.8.0"
+  },
+  "optionalDependencies": {
+    "keytar": "^7.9.0"
+  }
+}
