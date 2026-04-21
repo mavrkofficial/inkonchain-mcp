@@ -1,9 +1,19 @@
 {
   "name": "inkonchain-mcp",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "type": "module",
-  "description": "Curated Ink ecosystem MCP server — Sentry Launch Factory, Tsunami V3 DEX, ERC-8004 agent identity, ZNS .ink domains, DailyGM, Tsunami subgraph analytics, Relay cross-chain swaps, and ERC20/WETH utilities. Part of the Ink agent tooling stack alongside tydro-mcp and @nadohq/nado-mcp.",
+  "description": "Curated Ink ecosystem MCP server — Sentry Launch Factory, Tsunami V3 DEX, ERC-8004 agent identity, ZNS .ink domains, DailyGM family (DailyGM + DailyAgentGM + DailyGMPlus), Tsunami subgraph analytics, Relay cross-chain swaps, and ERC20/WETH utilities. Part of the Ink agent tooling stack alongside tydro-mcp and @nadohq/nado-mcp.",
   "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./lib": {
+      "types": "./dist/lib.d.ts",
+      "default": "./dist/lib.js"
+    }
+  },
   "bin": {
     "inkonchain-mcp": "dist/index.js",
     "inkonchain-mcp-setup": "dist/setup.js"
@@ -34,6 +44,9 @@
     "zns",
     "ink-domains",
     "dailygm",
+    "dailyagentgm",
+    "dailygmplus",
+    "gm-ink",
     "relay-protocol",
     "ecosystem"
   ],

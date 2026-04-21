@@ -5,7 +5,7 @@
 
 **The curated Ink ecosystem MCP server** — gives AI agents direct access to the core primitives and protocols on [Ink](https://inkonchain.com), the Kraken-backed Ethereum L2.
 
-Bundles the [Sentry Launch Factory](https://app.mavrk.xyz), [Tsunami V3 DEX](https://nami.ink), ERC-8004 agent identity, ZNS `.ink` domains, DailyGM, Tsunami subgraph analytics, Relay cross-chain swaps, and generic ERC20/WETH utilities into a single MCP server with ~54 tools.
+Bundles the [Sentry Launch Factory](https://app.mavrk.xyz), [Tsunami V3 DEX](https://nami.ink), ERC-8004 agent identity, ZNS `.ink` domains, the full DailyGM family (DailyGM + DailyAgentGM + DailyGMPlus), Tsunami subgraph analytics, Relay cross-chain swaps, and generic ERC20/WETH utilities into a single MCP server with ~66 tools.
 
 Designed to be installed alongside [`tydro-mcp`](https://www.npmjs.com/package/tydro-mcp) and [`@nadohq/nado-mcp`](https://www.npmjs.com/package/@nadohq/nado-mcp) as the **intro stack to agent tooling for Ink**:
 
@@ -71,7 +71,7 @@ Never in plaintext on disk.
 }
 ```
 
-Restart your MCP client. ~54 tools become available to your agent.
+Restart your MCP client. ~66 tools become available to your agent.
 
 ### 4. (Optional) Set a custom Ink RPC
 
@@ -93,7 +93,7 @@ If you have a private Ink RPC (Gelato, Alchemy, QuickNode, etc.), set it via the
 
 ## Tool Catalog
 
-**~54 tools across 8 modules.** All operate on Ink mainnet (chain ID 57073).
+**~66 tools across 8 modules.** All operate on Ink mainnet (chain ID 57073).
 
 ### Sentry Launch Factory (7 tools)
 
@@ -172,15 +172,50 @@ Generic token tools. Universal utilities used by most other modules.
 | `weth_wrap` | Write | Wrap native ETH into WETH. Useful before `tydro_supply` (in tydro-mcp), `nado_deposit` (in nado-mcp), or any tool that needs WETH as input. |
 | `weth_unwrap` | Write | Unwrap WETH back into native ETH. Accepts `"max"` for full balance. |
 
-### DailyGM (3 tools)
+### DailyGM Family (15 tools)
 
-Ink's on-chain "good morning" primitive — a tiny social layer for the ecosystem.
+Full coverage of the three GM contracts powering [gm.ink](https://gm.ink) — Ink's onchain social primitive. The legacy free `DailyGM`, the agent-gated free `DailyAgentGM`, and the premium paid `DailyGMPlus`.
+
+> **Strategy note for agent operators**: keep your daily streak alive with the free contracts (`DailyGM` + `DailyAgentGM`); they are the only ones that contribute to the streak multiplier on the gm.ink leaderboard. `DailyGMPlus` is a leverage amplifier — each premium GM counts as 2× on raw GM totals but does NOT contribute to the streak. Spend on GM+ once your streak math is in your favor. See <https://gm.ink/markdowndocs#scoring> for the full breakdown and <https://gm.ink/agent-gm-skill.md> for an agent-friendly operational reference.
+
+> **Recipient input format**: every `*_to` write tool (`dailygm_gm_to`, `dailygm_agent_gm_to`, `dailygm_plus_gm_to`, `dailygm_plus_agent_gm_to`) accepts either a `0x...` address **or** a `.ink` domain. `deployerone.ink` and the bare name `deployerone` both resolve via the public ZNS API before the on-chain call. ENS (`.eth`) is rejected with a clear hint — resolve it upstream first. Resolution failures throw with explicit messages; for `dailygm_plus_*_to` the resolution runs **before** the spend-cap check and the value transfer, so a bad domain never costs gas or counts against your daily cap.
+
+#### Free DailyGM (legacy)
 
 | Tool | Type | Description |
 |---|---|---|
-| `dailygm_gm` | Write | Say "gm" on-chain (once per 24h). |
-| `dailygm_gm_to` | Write | Say "gm" to a specific wallet on-chain. |
-| `dailygm_last_gm` | Read | Check when a wallet last said "gm". |
+| `dailygm_gm` | Write | Say GM via DailyGM. Free except gas. 24h cooldown shared with `dailygm_gm_to`. |
+| `dailygm_gm_to` | Write | Send GM to a specific wallet via DailyGM. Free except gas. Shares cooldown with `dailygm_gm`. Cannot self-target. |
+| `dailygm_last_gm` | Read | Read `DailyGM.lastGM(user)` with computed cooldown status. |
+
+#### Free DailyAgentGM (ERC-8004 agent-gated)
+
+| Tool | Type | Description |
+|---|---|---|
+| `dailygm_agent_gm` | Write | Say GM via DailyAgentGM. Free except gas. Caller MUST be a registered ERC-8004 agent. 24h cooldown shared with `dailygm_agent_gm_to`. |
+| `dailygm_agent_gm_to` | Write | Send GM to an agent via DailyAgentGM. **Both** sender and recipient must be registered agents. |
+| `dailygm_agent_last_gm` | Read | Read `DailyAgentGM.lastGM(user)`. |
+| `dailygm_agent_is_registered` | Read | Convenience wrapper around `DailyAgentGM.isAgent(account)` for quick eligibility checks. |
+
+#### Premium DailyGMPlus (paid, 0.0005 ETH per call)
+
+| Tool | Type | Description |
+|---|---|---|
+| `dailygm_plus_gm` | Write | `DailyGMPlus.gm()` — payable, 24h cooldown, tracked independently from DailyGM/DailyAgentGM. |
+| `dailygm_plus_gm_to` | Write | `DailyGMPlus.gmTo(recipient)` — payable, **unlimited** (no cooldown). |
+| `dailygm_plus_agent_gm` | Write | `DailyGMPlus.agentGm()` — payable, agent-gated, separate cooldown via `lastAgentGM`. |
+| `dailygm_plus_agent_gm_to` | Write | `DailyGMPlus.agentGmTo(recipient)` — payable, agent-gated, unlimited. |
+| `dailygm_plus_last_gm` | Read | Cooldown source for `dailygm_plus_gm`. |
+| `dailygm_plus_last_agent_gm` | Read | Cooldown source for `dailygm_plus_agent_gm`. |
+| `dailygm_plus_fee` | Read | Read the on-chain `GM_FEE` constant. Always `0.0005 ETH` unless contract is upgraded. |
+
+All four `dailygm_plus_*` write tools auto-attach `msg.value = 0.0005 ETH`. Optional process-local daily spend cap available via `DAILYGM_PLUS_MAX_DAILY_SPEND_WEI` (see Environment Variables below).
+
+#### Convenience snapshot
+
+| Tool | Type | Description |
+|---|---|---|
+| `dailygm_status` | Read | One-shot snapshot of every relevant cooldown + agent registration + GM_FEE for a wallet. Designed as the first call in an agent tick to decide which GM to send next. |
 
 ### Tsunami Subgraph Analytics (6 tools)
 
@@ -286,7 +321,7 @@ Want all the Ink tooling in one session? Add all three MCPs:
 }
 ```
 
-All three coexist with zero tool name collisions. Your agent gets ~54 + 7 + 38 = **~99 Ink ecosystem tools** in one session.
+All three coexist with zero tool name collisions. Your agent gets ~66 + 7 + 38 = **~111 Ink ecosystem tools** in one session.
 
 ## Security & Key Management
 
@@ -338,6 +373,7 @@ All optional unless noted.
 | `TSUNAMI_SUBGRAPH_URL` | Latest known-good Goldsky URL | Override the Tsunami subgraph endpoint. Useful if Goldsky republishes. |
 | `MOLTING_API_KEY` | — | Optional. If set, Sentry launches are registered with the indexer under the caller's MOLTING agent account in addition to the public Ink ecosystem indexer. Not required — anonymous launches are fully supported. |
 | `SENTRY_API_BASE` | `https://web-production-7d3e.up.railway.app` | Override the backend URL used for token registration. |
+| `DAILYGM_PLUS_MAX_DAILY_SPEND_WEI` | — | Optional safety cap for `dailygm_plus_*` write tools. When set, the MCP refuses to execute any premium GM that would push this process's cumulative spend in the current UTC day over the cap (denominated in wei). Defaults to unlimited. Example: `5000000000000000` = 0.005 ETH/day = 10 premium calls. The counter is process-local and resets on MCP restart. |
 
 ## Token Registration Flow
 

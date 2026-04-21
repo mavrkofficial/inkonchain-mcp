@@ -45,7 +45,7 @@ async function handleToolCall(name: string, args: Record<string, unknown>): Prom
 
 // ── Server Setup ───────────────────────────────────────────────────────
 const server = new Server(
-  { name: 'inkonchain-mcp', version: '1.0.0' },
+  { name: 'inkonchain-mcp', version: '1.2.0' },
   { capabilities: { tools: {} } },
 );
 
@@ -73,7 +73,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error(`inkonchain-mcp v1.0.0 — ${allTools.length} tools registered`);
+  console.error(`inkonchain-mcp v1.2.0 — ${allTools.length} tools registered`);
 }
 
 main().catch((err) => {

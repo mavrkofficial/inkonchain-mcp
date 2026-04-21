@@ -26,9 +26,38 @@ export const CONTRACTS = {
   IdentityRegistryProxy: '0x8004A169FB4a3325136EB29fA0ceB6D2e539a432',      // proxy (pending upgrade)
   ReputationRegistry: '0x8004BAa17C55a88189AE136b182e5fdA19dE9b63',
   ValidationRegistry: '0x8004Cc8439f36fd5F9F049D9fF86523Df6dAAB58',
-  // DailyGM
-  DailyGM: '0x9F500d075118272B3564ac6Ef2c70a9067Fd2d3F',
+  // DailyGM family
+  DailyGM:        '0x9F500d075118272B3564ac6Ef2c70a9067Fd2d3F',
+  DailyAgentGM:   '0x2B9DD9Eede2AeCB095455ce45122101109E4AeC7',
+  DailyGMPlus:    '0x3FB6088d7Bda27211DD9403DCC280B22249b73B3',
 } as const;
+
+// ── DailyGMPlus fee ────────────────────────────────────────────────────
+// Mirrors `uint256 public constant GM_FEE = 0.0005 ether;` in DailyGMPlus.sol.
+// All four payable functions (gm/gmTo/agentGm/agentGmTo) require msg.value to
+// equal this exact amount or they revert with `IncorrectFee(sent, required)`.
+export const DAILY_GM_PLUS_FEE_WEI = 500_000_000_000_000n; // 5 * 10^14 wei = 0.0005 ETH
+
+// ── DailyGMPlus optional daily spend cap (safety guardrail) ────────────
+// If set, the MCP will refuse to execute any `dailygm_plus_*` write tool that
+// would push the calling process's *cumulative spend in the current UTC day*
+// over this cap (denominated in wei). Defaults to unlimited so the operator
+// has to opt in. The cap is process-local — it resets when the MCP restarts
+// and is not persisted across runs. Pair with --max-old-space-size if you
+// run a long-lived agent loop.
+//
+// Example: `DAILYGM_PLUS_MAX_DAILY_SPEND_WEI=5000000000000000` caps spend at
+// 0.005 ETH per UTC day = 10 premium calls.
+export function getDailyGmPlusMaxDailySpendWei(): bigint | undefined {
+  const raw = process.env.DAILYGM_PLUS_MAX_DAILY_SPEND_WEI;
+  if (!raw) return undefined;
+  try {
+    const parsed = BigInt(raw);
+    return parsed >= 0n ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 // ── Subgraph ──────────────────────────────────────────────────────────
 // Override via TSUNAMI_SUBGRAPH_URL env var when Goldsky republishes the subgraph.

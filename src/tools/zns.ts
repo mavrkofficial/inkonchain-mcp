@@ -84,28 +84,56 @@ export const znsTools = [
   },
   {
     name: 'zns_get_price',
-    description: 'Get the registration price for one or more .ink domains.',
+    description: 'Get the registration price for one or more .ink domains. By default quotes 1-year cost; pass `years` to quote multi-year. priceToRegister returns a per-year price, so the total scales linearly with years.',
     inputSchema: {
       type: 'object' as const,
       properties: {
         domains: { type: 'array', items: { type: 'string' }, description: 'Array of domain names (without .ink TLD)' },
+        years: { type: 'integer', minimum: 1, default: 1, description: 'Registration duration in years (minimum 1, default 1). Used to scale the per-year price up to the total that zns_register will charge.' },
       },
       required: ['domains'],
     },
   },
   {
     name: 'zns_register',
-    description: 'Register one or more .ink domain names to wallet addresses. Use zns_get_price first to check cost.',
+    description: 'Register one or more .ink domain names to wallet addresses. Use zns_get_price first to check cost. IMPORTANT: registration duration must be ≥ 1 year — passing 0 registers a domain that expires immediately. This tool enforces a minimum of 1 year and defaults to 1 if `years` is omitted.',
     inputSchema: {
       type: 'object' as const,
       properties: {
         domains: { type: 'array', items: { type: 'string' }, description: 'Domain names to register (without .ink TLD)' },
         owners: { type: 'array', items: { type: 'string' }, description: 'Owner addresses for each domain (defaults to connected wallet for all)' },
+        years: { type: 'integer', minimum: 1, default: 1, description: 'Registration duration in years (minimum 1, default 1). Applied uniformly to every domain in the batch. The on-chain registry accepts 0 but the resulting domain expires immediately — this tool refuses 0 to prevent that footgun.' },
       },
       required: ['domains'],
     },
   },
 ];
+
+/**
+ * Coerce an arbitrary input into a positive integer year count, defaulting to 1
+ * when omitted. Throws with a clear message on 0/negative/non-integer/NaN.
+ *
+ * The on-chain `registerDomains(..., expiries, ...)` call accepts any uint256
+ * for `expiries[i]` including 0 — and 0 is a real footgun: the tx succeeds, the
+ * domain mints, fee is collected, then the domain immediately enters the
+ * grace/expired state. We refuse it at the tool boundary so agents can't
+ * accidentally torch ETH on a same-block-expiry registration.
+ */
+function coerceYears(raw: unknown): bigint {
+  if (raw === undefined || raw === null) return 1n;
+  const num = typeof raw === 'bigint' ? Number(raw) : Number(raw as number);
+  if (!Number.isFinite(num) || !Number.isInteger(num)) {
+    throw new Error(
+      `zns_register: \`years\` must be a positive integer, got ${JSON.stringify(raw)}.`,
+    );
+  }
+  if (num < 1) {
+    throw new Error(
+      `zns_register: \`years\` must be ≥ 1 (got ${num}). Passing 0 registers a domain that expires immediately — refusing to broadcast.`,
+    );
+  }
+  return BigInt(num);
+}
 
 function normalizeDomain(domain: string): string {
   return domain.endsWith(`.${TLD}`) ? domain.slice(0, -(TLD.length + 1)) : domain;
@@ -157,8 +185,12 @@ export async function handleZnsTool(name: string, args: Record<string, unknown>)
 
     case 'zns_get_price': {
       const domains = (args.domains as string[]).map(normalizeDomain);
-      // Call priceToRegister on-chain for each domain length
-      const prices = await Promise.all(
+      const years = coerceYears(args.years);
+      const yearsNum = Number(years);
+      // priceToRegister(length) returns the per-year price for a given domain
+      // length. Multiply by `years` so the quoted total matches what
+      // zns_register will actually charge.
+      const perYearPrices = await Promise.all(
         domains.map(d =>
           publicClient.readContract({
             address: ZNS_REGISTRY,
@@ -168,11 +200,16 @@ export async function handleZnsTool(name: string, args: Record<string, unknown>)
           })
         )
       );
-      const totalPrice = prices.reduce((sum, p) => sum + p, 0n);
+      const totalPrice = perYearPrices.reduce((sum, p) => sum + p * years, 0n);
       const formatted = Number(totalPrice) / 1e18;
       return {
         domains: domains.map(d => `${d}.${TLD}`),
-        prices: domains.map((d, i) => ({ domain: `${d}.${TLD}`, priceETH: (Number(prices[i]) / 1e18).toFixed(6) })),
+        years: yearsNum,
+        prices: domains.map((d, i) => ({
+          domain: `${d}.${TLD}`,
+          pricePerYearETH: (Number(perYearPrices[i]) / 1e18).toFixed(6),
+          totalETH: (Number(perYearPrices[i] * years) / 1e18).toFixed(6),
+        })),
         totalPriceETH: formatted.toFixed(6),
         totalPriceWei: totalPrice.toString(),
       };
@@ -186,8 +223,12 @@ export async function handleZnsTool(name: string, args: Record<string, unknown>)
         ? ownerArg
         : domains.map(() => defaultOwner);
 
-      // Get total price
-      const prices = await Promise.all(
+      // SAFETY: refuse 0/negative/non-integer years before any on-chain call.
+      // The registry contract will happily accept expiries[i] = 0 — it mints
+      // the NFT, charges the fee, and the domain is immediately expired.
+      const years = coerceYears(args.years);
+
+      const perYearPrices = await Promise.all(
         domains.map(d =>
           publicClient.readContract({
             address: ZNS_REGISTRY,
@@ -197,9 +238,9 @@ export async function handleZnsTool(name: string, args: Record<string, unknown>)
           })
         )
       );
-      const totalPrice = prices.reduce((sum, p) => sum + p, 0n);
+      const totalPrice = perYearPrices.reduce((sum, p) => sum + p * years, 0n);
 
-      const expiries = domains.map(() => 1n); // 1 year
+      const expiries = domains.map(() => years);
       const walletClient = await getWalletClient();
       const hash = await walletClient.writeContract({
         address: ZNS_REGISTRY,
@@ -213,6 +254,7 @@ export async function handleZnsTool(name: string, args: Record<string, unknown>)
       return {
         domains: domains.map(d => `${d}.${TLD}`),
         owners,
+        years: Number(years),
         totalPriceETH: (Number(totalPrice) / 1e18).toFixed(6),
         txHash: hash,
         status: receipt.status,
