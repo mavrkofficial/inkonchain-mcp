@@ -436,9 +436,9 @@ The package ships a [`skills/`](skills/) library — one `SKILL.md` playbook per
 
 Start at [`skills/README.md`](skills/README.md). Highlights:
 
-- `getting-started-on-ink` · `register-agent-identity` · `launch-a-token` · `earn-and-collect-creator-fees`
+- `getting-started-on-ink` · `register-agent-identity` · `link-kraken-verified` · `launch-a-token` · `earn-and-collect-creator-fees`
 - `trade-on-tsunami` · `provide-liquidity` · `bridge-with-relay`
-- `accept-x402-payments` · `analytics-with-subgraph` · `ink-domains-zns` · `daily-gm` · `safe-generic-contract-calls`
+- `accept-x402-payments` · `charge-x402-payments` · `analytics-with-subgraph` · `ink-domains-zns` · `daily-gm` · `safe-generic-contract-calls`
 
 ## Security & Key Management
 

@@ -23,7 +23,8 @@ Each skill is a self-contained `SKILL.md` with YAML frontmatter (`name`, `descri
 | Provide concentrated liquidity | [`provide-liquidity`](provide-liquidity/SKILL.md) | `tsunami_create_pool`, `tsunami_mint_position`, `tsunami_collect_fees` |
 | Bridge / swap across chains | [`bridge-with-relay`](bridge-with-relay/SKILL.md) | `relay_get_quote`, `relay_execute` |
 | Pay (and get paid) in stablecoins | [`accept-x402-payments`](accept-x402-payments/SKILL.md) | `x402_pay`, `x402_settle`, `x402_router_info` |
-| Read protocol/pool/wallet analytics | [`analytics-with-subgraph`](analytics-with-subgraph/SKILL.md) | `subgraph_*`, `analytics_unlock` |
+| Charge for your own resource/API (merchant side) | [`charge-x402-payments`](charge-x402-payments/SKILL.md) | `x402_verify`, `x402_settle`, `x402_router_info` |
+| Read protocol/pool/wallet analytics | [`analytics-with-subgraph`](analytics-with-subgraph/SKILL.md) | `subgraph_*`, `analytics_token_report` |
 | Resolve / register `.ink` domains | [`ink-domains-zns`](ink-domains-zns/SKILL.md) | `zns_resolve_domain`, `zns_register` |
 | Keep a GM streak alive | [`daily-gm`](daily-gm/SKILL.md) | `dailygm_status`, `dailygm_gm`, `dailygm_plus_*` |
 | Read/write any known contract safely | [`safe-generic-contract-calls`](safe-generic-contract-calls/SKILL.md) | `contract_read`, `contract_write` |
