@@ -16,7 +16,7 @@ export const x402Tools = [
   },
   {
     name: 'x402_supported',
-    description: 'Read supported x402 payment requirements from the configured Ink facilitator. Advertises USDC exact payments on Ink.',
+    description: 'Read supported x402 payment requirements from the configured Ink facilitator. Advertises USDC and USDT0 exact payments on Ink.',
     inputSchema: { type: 'object' as const, properties: {} },
   },
   {

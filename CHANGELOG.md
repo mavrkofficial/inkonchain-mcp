@@ -2,7 +2,7 @@
 
 All notable changes to `inkonchain-mcp` are documented in this file.
 
-## Unreleased
+## [1.2.1] — 2026-05-30
 
 ### Sentry Launch Factory expansion
 
@@ -43,8 +43,8 @@ All notable changes to `inkonchain-mcp` are documented in this file.
   - `x402_verify`
   - `x402_settle`
   - `x402_router_info`
-- Defaulted `X402_FACILITATOR_URL` to `https://x402.sentry.trading`.
-- Added the deployed USDT0 x402 router constant and `x402_router_info({ asset: "USDT0" })` support. Facilitator `/supported` and `/settle` remain USDC-only until the service is updated for multi-asset routing.
+- Defaulted `X402_FACILITATOR_URL` to the live multi-asset facilitator at `https://x402.sentry.trading`.
+- Added the deployed USDT0 x402 router constant and `x402_router_info({ asset: "USDT0" })` support. The facilitator now advertises and settles both USDC and USDT0 payment networks via `/supported`, `/verify`, and `/settle`.
 - Added README strategy examples for launching an agent token, monitoring a pool, buying back with USDT0, and checking/collecting creator rewards.
 
 ## [1.2.0] — 2026-04-21

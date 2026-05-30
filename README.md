@@ -290,7 +290,7 @@ Cross-chain bridging and swap aggregation via [Relay](https://relay.link). Route
 
 ### x402 Payments on Ink (6 tools)
 
-USDC-denominated x402 v2 payments on Ink through the `X402FeeRouter` and optional Railway facilitator. The facilitator validates EIP-3009 USDC authorizations and can sponsor settlement gas through a self-relayer. A USDT0 router is also deployed and exposed through `x402_router_info`; facilitator settlement support for USDT0 is a follow-up service update.
+USDC- and USDT0-denominated x402 v2 payments on Ink through the `X402FeeRouter` contracts and the Railway facilitator. The facilitator validates EIP-3009 stablecoin authorizations and can sponsor settlement gas through a self-relayer. Both assets are live: the facilitator advertises USDC and USDT0 payment networks via `/supported` and settles either through its asset-specific router.
 
 | Tool | Type | Description |
 |---|---|---|
