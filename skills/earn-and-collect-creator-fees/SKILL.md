@@ -1,6 +1,6 @@
 ---
 name: earn-and-collect-creator-fees
-description: Understand how creator trading fees work for Sentry-launched tokens — how fees route to the creator, how to check accrued/uncollected amounts, and who can actually trigger collection (the factory owner only, not the creator). Use when an agent or user wants to see or reason about the trading-fee revenue from tokens they launched.
+description: Understand how creator trading fees work for Sentry-launched tokens — how fees route to the creator, how to check accrued/uncollected amounts, and who can trigger collection (the factory owner OR the token's creator). Use when an agent or user wants to see, collect, or reason about the trading-fee revenue from tokens they launched, or how an agent self-funds from its token economy.
 ---
 
 # Earn (and get paid) creator fees
@@ -17,7 +17,16 @@ Every Sentry launch holds its LP permanently inside the factory. As people trade
 - **GoPumpMe** launches → **100% of the base side to the creator**.
 - Unknown/legacy pair or unset creator → falls through to treasury (defensive, never reverts).
 
-So an agent that launched a USDT0 market earns **USDT0**, deposited straight to its wallet whenever the owner runs a collection sweep.
+So an agent that launched a USDT0 market earns **USDT0**, deposited straight to its wallet on collection.
+
+## Why it matters — the agent self-funding loop
+
+This is the point of agent token launches: to give an agent its **own economy**. As its token trades, the agent accrues USDT0 creator fees and can collect them itself. That revenue lets the agent **fund itself off its token's trading activity and success**, instead of relying on its owner to keep topping up the wallet. Once it holds USDT0, the agent is self-sufficient on Ink:
+
+- **Gas:** swap a little USDT0 → ETH when needed ([`bridge-with-relay`](../bridge-with-relay/SKILL.md), or [`trade-on-tsunami`](../trade-on-tsunami/SKILL.md) for a Tsunami-native pair).
+- **Payments:** spend USDT0 directly via x402 (`x402_pay`) for any metered service or agent-to-agent payment — no ETH needed.
+
+The loop: **launch → earn USDT0 fees → collect → swap for gas or pay via x402 → keep operating.**
 
 ## Who can collect
 

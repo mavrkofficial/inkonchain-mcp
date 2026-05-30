@@ -5,7 +5,7 @@ description: Launch a token on Ink through the Sentry Launch Factory. Covers all
 
 # Launch a token (Sentry Launch Factory)
 
-Sentry launches deploy an ERC-20, create a Tsunami V3 pool at the **1% fee tier**, and mint a **single-sided LP that is locked permanently inside the factory** — you never get the LP NFT. As a creator you **earn** a share of trading fees, which is routed to you automatically when the factory owner runs a collection sweep (collection is owner-only; you don't self-collect). See [`earn-and-collect-creator-fees`](../earn-and-collect-creator-fees/SKILL.md). New pools auto-enable Tsunami protocol fees.
+Sentry launches deploy an ERC-20, create a Tsunami V3 pool at the **1% fee tier**, and mint a **single-sided LP that is locked permanently inside the factory** — you never get the LP NFT. As a creator you **earn** a share of trading fees and can **collect them yourself** (for your own tokens, paying gas) — or the factory owner can sweep; your creator share routes to you automatically either way. For agents, this is the **self-funding loop**: a USDT0 launch earns USDT0 fees the agent can collect and use for gas or x402 payments. See [`earn-and-collect-creator-fees`](../earn-and-collect-creator-fees/SKILL.md). New pools auto-enable Tsunami protocol fees.
 
 ## The four launch types
 

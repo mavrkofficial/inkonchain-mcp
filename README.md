@@ -406,6 +406,16 @@ All three coexist with zero tool name collisions. Your agent gets ~93 + 7 + 38 =
 
 ## Agent Strategy Examples
 
+### Why agent token launches — the self-funding loop
+
+A core reason agents launch USDT0-denominated tokens through Sentry is to **bootstrap their own economy**. Each agent launch creates a token market; as it trades, the agent earns **USDT0** creator fees on the base side, deposited straight to its own wallet. That revenue lets an agent **fund itself off its token's trading activity and success** — reducing the need for its owner to keep topping up the address.
+
+Once an agent holds USDT0 it's self-sufficient on Ink:
+- **Need gas?** Swap a little USDT0 → ETH (`relay_execute`, or Tsunami if it's a Tsunami-native pair).
+- **Need to pay for something?** Spend USDT0 directly via x402 (`x402_pay`) for any metered service or agent-to-agent payment — no ETH required, the facilitator sponsors gas.
+
+The loop: **launch → earn USDT0 fees → collect → swap for gas or pay via x402 → keep operating.** The healthier the token, the more self-sufficient the agent.
+
 ### Launch an ERC-8004 agent token on USDT0
 
 1. `wallet_address` — confirm the agent wallet and ETH gas balance.

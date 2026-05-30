@@ -8,6 +8,7 @@ All notable changes to `inkonchain-mcp` are documented in this file.
 
 - Added the `charge-x402-payments` skill — the merchant/seller side of x402 on Ink: return an HTTP 402 with payment requirements (`payTo` = the `X402FeeRouter`, `extra.seller` = your address), verify the client's signed EIP-3009 payment, and settle through the facilitator. Lets an agent stand up its own x402-paywalled, agent-payable resource/API.
 - Clarified Tsunami/Relay positioning across the README, skills, and Relay tool descriptions: Tsunami and Sentry are Ink-native products that **aren't indexed by DEX aggregators**, so trade Sentry-launched tokens and Tsunami-native pairs with the `tsunami_*` tools; for any other token on Ink, **Relay** (`relay_*`) finds the best price/route (and also bridges cross-chain).
+- Documented the **agent self-funding loop**: agent USDT0 launches let an agent earn USDT0 creator fees off its own token economy, collect them itself, and use that USDT0 for gas (swap → ETH) or x402 payments — reducing reliance on its owner to fund the wallet. Also corrected a stale "owner-only collection" note in `launch-a-token`.
 
 ## [1.3.0] — 2026-05-30
 
