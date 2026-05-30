@@ -3,7 +3,7 @@
 ![version](https://img.shields.io/npm/v/inkonchain-mcp?color=blue)
 ![license](https://img.shields.io/npm/l/inkonchain-mcp?color=green)
 
-**The curated Ink ecosystem MCP server** — gives AI agents direct access to the Ink-native products and ecosystem primitives on [Ink](https://inkonchain.com), the Kraken-backed Ethereum L2.
+**A curated Ink ecosystem MCP server** — gives AI agents direct access to the Ink-native products and ecosystem primitives on [Ink](https://inkonchain.com), the Kraken-backed Ethereum L2.
 
 Bundles the [Sentry Launch Factory](https://sentry.trading), [Tsunami V3 DEX](https://nami.ink), ERC-8004 agent identity, ZNS `.ink` domains, the full DailyGM family (DailyGM + DailyAgentGM + DailyGMPlus), free Tsunami subgraph analytics, free composed premium analytics, Relay best-price swap routing + cross-chain bridging, x402 USDC/USDT0 payments, wallet utilities, guarded contract access, and generic ERC20/WETH utilities into a single MCP server with ~93 tools.
 
@@ -26,6 +26,8 @@ Designed to be installed alongside [`tydro-mcp`](https://www.npmjs.com/package/t
 ```
 
 Each MCP is maintained by the team behind the protocols it covers. Install any combination — they're designed to coexist with zero tool name collisions.
+
+Want to contribute to `inkonchain-mcp` — add a protocol, a tool, or a skill? Reach out at [sergio@inkfnd.com](mailto:sergio@inkfnd.com).
 
 > [!CAUTION]
 > This is experimental software. It interacts with the live Ink blockchain and can execute real financial transactions. Read the risks below before using with real funds or AI agents.
