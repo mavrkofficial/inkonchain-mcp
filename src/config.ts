@@ -93,6 +93,12 @@ export const SENTRY_API_BASE = process.env.SENTRY_API_BASE ?? 'https://web-produ
 // on Ink. Tools that call the HTTP facilitator require this env var.
 export const X402_FACILITATOR_URL = process.env.X402_FACILITATOR_URL ?? 'https://x402.sentry.trading';
 
+// ── x402 default asset ─────────────────────────────────────────────────
+// Default x402 payment asset on Ink for the `x402_pay` tool. USDT0-first
+// (it's the agent-market base asset); USDC remains fully supported as an
+// option.
+export const DEFAULT_X402_ASSET: 'USDC' | 'USDT0' = 'USDT0';
+
 // ── Constants ─────────────────────────────────────────────────────────
 export const DEFAULT_SLIPPAGE_BPS = 50;
 export const DEFAULT_DEADLINE_MINUTES = 20;

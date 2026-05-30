@@ -2,6 +2,26 @@
 
 All notable changes to `inkonchain-mcp` are documented in this file.
 
+## [1.3.0] — 2026-05-30
+
+### x402 payments + premium analytics
+
+- Added `x402_pay`: builds, signs (EIP-3009 `ReceiveWithAuthorization`), and settles an `exact` USDT0/USDC payment to a seller in one call. No prior ERC-20 approval and no ETH needed — the facilitator sponsors settlement gas. Reusable for agent-to-agent payments and paying for metered services. Defaults to USDT0.
+- Added a **premium analytics module** (`analytics_*`) — composed, high-value reads that don't exist in the raw subgraph. All **free** and read-only, built on the public Tsunami subgraph + onchain reads. The basic `subgraph_*` reads remain free as well.
+  - `analytics_token_report` — token dossier: price, FDV, liquidity, 24h volume/change, pools, Sentry launch type + creator.
+  - `analytics_pool_health` — TVL, 7d volume/fees, fee APR, onchain price-impact curve via the Tsunami quoter.
+  - `analytics_top_movers` — top tokens by volume + price change over 24h/7d.
+  - `analytics_new_launches` — newest Sentry launches with early traction.
+  - `analytics_creator_dashboard` — creator-wide TVL/volume/fees rollup + creator fees paid out.
+  - `analytics_wallet_pnl` — LP positions with deposited/withdrawn/fees + realized PnL estimate.
+  - `analytics_token_risk` — heuristic 0-100 safety score (LP-lock status, launch type, liquidity, age, drawdown).
+  - `analytics_search` — search indexed tokens by symbol/name, ranked by volume.
+  - `analytics_leaderboard` — top creators by fees paid out, or top tokens by volume.
+- `sentry_collect_fees` now reflects the upgraded SentryLaunchFactory: collectable by the factory owner OR a token's creator (routing unchanged). New implementation `0xd5bceD4c43eef627eE0524368cABAfcb9f29CfF0`.
+- Added skills: `link-kraken-verified` (link a KYC'd Kraken account via inkonchain.com/verify). Documented [`kraken-cli`](https://github.com/krakenfx/kraken-cli) as the CEX-level companion in the Ink agent tooling stack.
+- x402 defaults to **USDT0** on Ink across `x402_pay` and `x402_router_info` (USDC remains selectable); exported `DEFAULT_X402_ASSET` from `inkonchain-mcp/lib`.
+- Added an agent skills library under `skills/` (one `SKILL.md` per capability) bundled in the npm package.
+
 ## [1.2.1] — 2026-05-30
 
 ### Sentry Launch Factory expansion
@@ -51,7 +71,7 @@ All notable changes to `inkonchain-mcp` are documented in this file.
 
 ### New: native `.ink` domain resolution in every `dailygm_*_to` tool
 
-Every recipient-taking write tool in the DailyGM family — `dailygm_gm_to`, `dailygm_agent_gm_to`, `dailygm_plus_gm_to`, `dailygm_plus_agent_gm_to` — now accepts either a `0x...` address **or** a `.ink` domain (e.g. `deployerone.ink`, or just the bare name `deployerone`) as the `recipient`. Domains are resolved via the public ZNS API (`zns.bio/api/resolveDomain`) before the on-chain call.
+Every recipient-taking write tool in the DailyGM family — `dailygm_gm_to`, `dailygm_agent_gm_to`, `dailygm_plus_gm_to`, `dailygm_plus_agent_gm_to` — now accepts either a `0x...` address **or** a `.ink` domain (e.g. `deployerone.ink`, or just the bare name `deployerone`) as the `recipient`. Domains are resolved via the public ZNS API (`zns.bio/api/resolveDomain`) before the onchain call.
 
 Why: agents using the focused `gmink-mcp` package (which ships only `dailygm_*` tools, no ZNS surface) had no way to resolve a `.ink` domain. They'd either fail silently, fall back to a hardcoded address, or send the GM to the wrong wallet. Now every `*_to` tool handles resolution itself, so an agent given "send a GM+ to deployerone.ink" can pass that string directly without chaining to a separate resolver.
 
@@ -73,7 +93,7 @@ No changes to read tools, no changes to non-`*_to` write tools, no breaking chan
 
 ### Fix: ZNS registration footgun + multi-year support
 
-The ZNS registry contract accepts `expiries[i] = 0` on `registerDomains` — the tx succeeds, the NFT mints, the fee is collected, and the resulting domain is **immediately expired**. `zns_register` now refuses 0/negative/non-integer values for `years` at the tool boundary, before any on-chain call, with a clear error explaining the footgun.
+The ZNS registry contract accepts `expiries[i] = 0` on `registerDomains` — the tx succeeds, the NFT mints, the fee is collected, and the resulting domain is **immediately expired**. `zns_register` now refuses 0/negative/non-integer values for `years` at the tool boundary, before any onchain call, with a clear error explaining the footgun.
 
 ### New: `years` parameter on `zns_register` and `zns_get_price`
 
@@ -82,7 +102,7 @@ Previously `zns_register` was hardcoded to 1 year and `zns_get_price` returned p
 - `zns_get_price` multiplies the per-year `priceToRegister(length)` quote by `years` and returns both the per-year and total figures, so the quoted total matches what `zns_register` will actually charge.
 - `zns_register` validates `years >= 1` via a shared `coerceYears` helper and applies it uniformly to every domain in the batch.
 
-The on-chain payload shape is unchanged; only the input validation and pricing math are updated. Existing callers that omit `years` keep their previous behavior (1 year per domain).
+The onchain payload shape is unchanged; only the input validation and pricing math are updated. Existing callers that omit `years` keep their previous behavior (1 year per domain).
 
 ---
 
@@ -107,7 +127,7 @@ The `dailygm` module now covers all three GM contracts that power [gm.ink](https
 - `dailygm_plus_agent_gm_to` — `DailyGMPlus.agentGmTo(recipient)`, payable, agent-gated, unlimited.
 - `dailygm_plus_last_gm` — read `DailyGMPlus.lastGM(user)` (cooldown source for `dailygm_plus_gm`).
 - `dailygm_plus_last_agent_gm` — read `DailyGMPlus.lastAgentGM(user)` (cooldown source for `dailygm_plus_agent_gm`).
-- `dailygm_plus_fee` — read the on-chain `GM_FEE` constant (always `0.0005 ETH` unless contract upgraded).
+- `dailygm_plus_fee` — read the onchain `GM_FEE` constant (always `0.0005 ETH` unless contract upgraded).
 
 **New convenience tool:**
 
@@ -154,10 +174,10 @@ The pre-existing `DailyGM` entry is unchanged.
 
 - **Sentry Launch Factory** (7 tools) — permissionless + agent-gated token launches with single-sided LP locked in the factory
 - **Tsunami V3 DEX** (13 tools) — concentrated liquidity DEX with full position management
-- **ERC-8004 Agent Identity** (6 tools) — on-chain agent identity registry, gates `sentry_launch_agent`
+- **ERC-8004 Agent Identity** (6 tools) — onchain agent identity registry, gates `sentry_launch_agent`
 - **ZNS `.ink` Domains** (6 tools) — Ink native domain name service
 - **ERC-20 + WETH Utilities** (6 tools) — generic token balance/approve/transfer + native ETH wrapping
-- **DailyGM** (3 tools) — on-chain "gm" social primitive
+- **DailyGM** (3 tools) — onchain "gm" social primitive
 - **Tsunami Subgraph Analytics** (6 tools) — read-only Goldsky subgraph queries for protocol data
 - **Relay Protocol** (7 tools) — cross-chain bridging and swap aggregation; `relay_execute` supports any of the 60+ EVM chains in `viem/chains` from a single private key
 

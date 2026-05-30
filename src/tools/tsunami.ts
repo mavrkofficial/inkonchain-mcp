@@ -38,7 +38,7 @@ async function ensureApproval(token: Address, spender: Address, amount: bigint) 
   // Reject silent failures: viem's waitForTransactionReceipt does NOT throw on reverted txs.
   if (receipt.status !== 'success') {
     throw new Error(
-      `Approval reverted on-chain (token=${token} spender=${spender} tx=${hash}). ` +
+      `Approval reverted onchain (token=${token} spender=${spender} tx=${hash}). ` +
       `The router/spender will not be able to pull tokens. Aborting before swap to avoid wasted gas.`
     );
   }

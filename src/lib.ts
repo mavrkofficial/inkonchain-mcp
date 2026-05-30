@@ -2,7 +2,7 @@
 // individual tool modules instead of running the full inkonchain-mcp server.
 //
 // `inkonchain-mcp` itself is a binary (`bin: dist/index.js`) — running it
-// stands up a stdio MCP server with all ~77 tools registered. Packages that
+// stands up a stdio MCP server with all ~91 tools registered. Packages that
 // want a tighter surface (e.g. `gm-mcp` which only ships the DailyGM family)
 // should depend on this package and import from `inkonchain-mcp/lib` instead
 // of spawning the binary, then register only the tool modules they want.
@@ -37,6 +37,7 @@ export {
   DAILY_AGENT_GM_SUBGRAPH_URL,
   DAILY_GM_PLUS_SUBGRAPH_URL,
   X402_FACILITATOR_URL,
+  DEFAULT_X402_ASSET,
   getDailyGmPlusMaxDailySpendWei,
 } from './config.js';
 
@@ -59,6 +60,7 @@ export { znsTools,       handleZnsTool       } from './tools/zns.js';
 export { walletTools,    handleWalletTool    } from './tools/wallet.js';
 export { contractTools,  handleContractTool  } from './tools/contract.js';
 export { x402Tools,      handleX402Tool      } from './tools/x402.js';
+export { analyticsTools, handleAnalyticsTool } from './tools/analytics.js';
 
 // ── ABIs (occasionally useful for downstream typing) ──────────────
 export { DailyGMABI }       from './abis/DailyGM.js';

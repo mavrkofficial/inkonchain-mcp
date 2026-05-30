@@ -1,6 +1,10 @@
 import { SUBGRAPH_URL } from '../config.js';
 
-async function querySubgraph(query: string, variables?: Record<string, unknown>) {
+/**
+ * Shared GraphQL fetch against the Tsunami V3 subgraph. Exported so the
+ * premium `analytics_*` tools can compose the same endpoint.
+ */
+export async function querySubgraph(query: string, variables?: Record<string, unknown>) {
   const res = await fetch(SUBGRAPH_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

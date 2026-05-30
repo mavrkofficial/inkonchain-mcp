@@ -21,7 +21,7 @@ const NPM = CONTRACTS.TsunamiV3PositionManager as Address;
  * authenticated internal tracking tables.
  *
  * Non-fatal: any network or backend error is swallowed so a successful
- * on-chain launch is never reported as failed just because the indexer
+ * onchain launch is never reported as failed just because the indexer
  * call hiccupped.
  */
 async function registerTokenWithIndexer(params: {
@@ -52,7 +52,7 @@ async function registerTokenWithIndexer(params: {
       }),
     });
   } catch (_) {
-    /* non-fatal — on-chain launch already succeeded */
+    /* non-fatal — onchain launch already succeeded */
   }
 }
 
@@ -72,13 +72,12 @@ export const sentryTools = [
   },
   {
     name: 'sentry_launch_agent',
-    description: 'Agent-only token launch via Sentry. Gated by an ERC-8004 identity NFT on Ink (register via identity_register first). Defaults to USDT0 base so agents launch USDT0-denominated markets (~$5K starting FDV via the current USDT0 pool manager). Creator rewards are paid from the base-token side.',
+    description: 'Agent-only token launch via Sentry. Gated by an ERC-8004 identity NFT on Ink (register via identity_register first). Always launches a USDT0-denominated market (~$5K starting FDV via the current USDT0 pool manager) — WETH/token agent pairs are intentionally not exposed. Creator rewards are paid from the USDT0/base side.',
     inputSchema: {
       type: 'object' as const,
       properties: {
         name: { type: 'string', description: 'Token name' },
         symbol: { type: 'string', description: 'Token symbol' },
-        baseToken: { type: 'string', description: 'Base pair token address. Defaults to USDT0.' },
       },
       required: ['name', 'symbol'],
     },
@@ -202,7 +201,7 @@ export const sentryTools = [
   },
   {
     name: 'sentry_collect_fees',
-    description: 'Collect trading fees from factory-held LP positions. Owner only. Launched-token-side fees go to treasury; base-token-side fees split by creatorFeeBps, except GoPumpMe positions where base-side fees route 100% to creator.',
+    description: 'Collect trading fees from factory-held LP positions. Callable by the factory owner (any token IDs) OR by a token\'s creator (only IDs they created — the caller pays gas). Routing is automatic regardless of caller: launched-token-side fees go to treasury; base-token-side fees split by creatorFeeBps, except GoPumpMe positions where base-side fees route 100% to creator.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -281,8 +280,9 @@ export async function handleSentryTool(name: string, args: Record<string, unknow
     case 'sentry_launch_agent': {
       const tokenName = args.name as string;
       const symbol = args.symbol as string;
-      const baseToken = (args.baseToken as Address | undefined) ?? USDT0;
-      return launchToken({ functionName: 'launchAgent', tokenName, symbol, baseToken, deploymentOrigin: 'autonomous' });
+      // Agent launches are always USDT0-based markets — WETH/token agent pairs
+      // are intentionally not exposed.
+      return launchToken({ functionName: 'launchAgent', tokenName, symbol, baseToken: USDT0, deploymentOrigin: 'autonomous' });
     }
 
     case 'sentry_launch_agent_usdt0': {

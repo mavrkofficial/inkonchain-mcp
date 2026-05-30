@@ -119,7 +119,7 @@ async function resolveRecipient(input: unknown): Promise<{
 // Counts only successful broadcasts (sent → returned a hash). Resets at the
 // start of every UTC day. Persists across tool calls but NOT across MCP
 // process restarts. Designed as a guardrail against runaway agent loops, not
-// as a hardened audit trail — pair with on-chain spend if you need that.
+// as a hardened audit trail — pair with onchain spend if you need that.
 let spendCounter = { day: currentUtcDay(), spentWei: 0n };
 
 function currentUtcDay(): string {
@@ -179,7 +179,7 @@ export const dailyGmTools = [
   // ── Free DailyGM (legacy) ────────────────────────────────────────
   {
     name: 'dailygm_gm',
-    description: 'Say GM on-chain via the legacy DailyGM contract. Free except gas. 24h cooldown shared with dailygm_gm_to.',
+    description: 'Say GM onchain via the legacy DailyGM contract. Free except gas. 24h cooldown shared with dailygm_gm_to.',
     inputSchema: { type: 'object' as const, properties: {} },
   },
   {
@@ -302,7 +302,7 @@ export const dailyGmTools = [
   },
   {
     name: 'dailygm_plus_fee',
-    description: 'Read the on-chain DailyGMPlus.GM_FEE constant. Returns the per-call fee in wei and ETH. Always 0.0005 ETH unless the contract is upgraded.',
+    description: 'Read the onchain DailyGMPlus.GM_FEE constant. Returns the per-call fee in wei and ETH. Always 0.0005 ETH unless the contract is upgraded.',
     inputSchema: { type: 'object' as const, properties: {} },
   },
 
@@ -337,7 +337,7 @@ export async function handleDailyGmTool(name: string, args: Record<string, unkno
         status: receipt.status,
         sender,
         message: receipt.status === 'success'
-          ? 'GM! Recorded on-chain via DailyGM.'
+          ? 'GM! Recorded onchain via DailyGM.'
           : 'GM failed — likely 24h cooldown still active. Read dailygm_last_gm for details.',
       };
     }
@@ -383,7 +383,7 @@ export async function handleDailyGmTool(name: string, args: Record<string, unkno
         status: receipt.status,
         sender,
         message: receipt.status === 'success'
-          ? 'Agent GM! Recorded on-chain via DailyAgentGM.'
+          ? 'Agent GM! Recorded onchain via DailyAgentGM.'
           : 'Agent GM failed — caller may not be a registered agent (NotRegisteredAgent) or 24h cooldown still active (DailyLimitActive).',
       };
     }
@@ -449,7 +449,7 @@ export async function handleDailyGmTool(name: string, args: Record<string, unkno
         spentTodayWei: spendCounter.spentWei.toString(),
         spentTodayEth: formatEther(spendCounter.spentWei),
         message: receipt.status === 'success'
-          ? 'Premium GM! Recorded on-chain via DailyGMPlus.gm.'
+          ? 'Premium GM! Recorded onchain via DailyGMPlus.gm.'
           : 'Premium GM failed — likely DailyLimitActive (24h cooldown) or IncorrectFee. Read dailygm_plus_last_gm for cooldown status.',
       };
     }
@@ -501,7 +501,7 @@ export async function handleDailyGmTool(name: string, args: Record<string, unkno
         spentTodayWei: spendCounter.spentWei.toString(),
         spentTodayEth: formatEther(spendCounter.spentWei),
         message: receipt.status === 'success'
-          ? 'Premium agent GM! Recorded on-chain via DailyGMPlus.agentGm.'
+          ? 'Premium agent GM! Recorded onchain via DailyGMPlus.agentGm.'
           : 'Premium agent GM failed — caller may not be a registered agent, or 24h cooldown active, or IncorrectFee.',
       };
     }

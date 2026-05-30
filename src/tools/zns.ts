@@ -102,7 +102,7 @@ export const znsTools = [
       properties: {
         domains: { type: 'array', items: { type: 'string' }, description: 'Domain names to register (without .ink TLD)' },
         owners: { type: 'array', items: { type: 'string' }, description: 'Owner addresses for each domain (defaults to connected wallet for all)' },
-        years: { type: 'integer', minimum: 1, default: 1, description: 'Registration duration in years (minimum 1, default 1). Applied uniformly to every domain in the batch. The on-chain registry accepts 0 but the resulting domain expires immediately — this tool refuses 0 to prevent that footgun.' },
+        years: { type: 'integer', minimum: 1, default: 1, description: 'Registration duration in years (minimum 1, default 1). Applied uniformly to every domain in the batch. The onchain registry accepts 0 but the resulting domain expires immediately — this tool refuses 0 to prevent that footgun.' },
       },
       required: ['domains'],
     },
@@ -113,7 +113,7 @@ export const znsTools = [
  * Coerce an arbitrary input into a positive integer year count, defaulting to 1
  * when omitted. Throws with a clear message on 0/negative/non-integer/NaN.
  *
- * The on-chain `registerDomains(..., expiries, ...)` call accepts any uint256
+ * The onchain `registerDomains(..., expiries, ...)` call accepts any uint256
  * for `expiries[i]` including 0 — and 0 is a real footgun: the tx succeeds, the
  * domain mints, fee is collected, then the domain immediately enters the
  * grace/expired state. We refuse it at the tool boundary so agents can't
@@ -223,7 +223,7 @@ export async function handleZnsTool(name: string, args: Record<string, unknown>)
         ? ownerArg
         : domains.map(() => defaultOwner);
 
-      // SAFETY: refuse 0/negative/non-integer years before any on-chain call.
+      // SAFETY: refuse 0/negative/non-integer years before any onchain call.
       // The registry contract will happily accept expiries[i] = 0 — it mints
       // the NFT, charges the fee, and the domain is immediately expired.
       const years = coerceYears(args.years);

@@ -19,6 +19,7 @@ import { dailyGmTools, handleDailyGmTool } from './tools/dailygm.js';
 import { walletTools, handleWalletTool } from './tools/wallet.js';
 import { contractTools, handleContractTool } from './tools/contract.js';
 import { x402Tools, handleX402Tool } from './tools/x402.js';
+import { analyticsTools, handleAnalyticsTool } from './tools/analytics.js';
 
 // ── All Tools ──────────────────────────────────────────────────────────
 const allTools = [
@@ -33,6 +34,7 @@ const allTools = [
   ...walletTools,
   ...contractTools,
   ...x402Tools,
+  ...analyticsTools,
 ];
 
 // ── Route tool calls ───────────────────────────────────────────────────
@@ -40,6 +42,7 @@ async function handleToolCall(name: string, args: Record<string, unknown>): Prom
   if (name.startsWith('erc20_'))    return handleErc20Tool(name, args);
   if (name.startsWith('weth_'))     return handleErc20Tool(name, args);  // weth_wrap / weth_unwrap live in erc20.ts
   if (name.startsWith('subgraph_')) return handleSubgraphTool(name, args);
+  if (name.startsWith('analytics_')) return handleAnalyticsTool(name, args);
   if (name.startsWith('sentry_'))   return handleSentryTool(name, args);
   if (name.startsWith('tsunami_'))  return handleTsunamiTool(name, args);
   if (name.startsWith('relay_'))    return handleRelayTool(name, args);
@@ -54,7 +57,7 @@ async function handleToolCall(name: string, args: Record<string, unknown>): Prom
 
 // ── Server Setup ───────────────────────────────────────────────────────
 const server = new Server(
-  { name: 'inkonchain-mcp', version: '1.2.0' },
+  { name: 'inkonchain-mcp', version: '1.3.0' },
   { capabilities: { tools: {} } },
 );
 
@@ -82,7 +85,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error(`inkonchain-mcp v1.2.0 — ${allTools.length} tools registered`);
+  console.error(`inkonchain-mcp v1.3.0 — ${allTools.length} tools registered`);
 }
 
 main().catch((err) => {
