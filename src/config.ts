@@ -20,7 +20,13 @@ export const CONTRACTS = {
   TsunamiQuoterV2: '0x547D43a6F83A28720908537Aa25179ff8c6A6411',
   TsunamiSwapRouter02: '0x4415F2360bfD9B1bF55500Cb28fA41dF95CB2d2b',
   SentryLaunchFactory: '0xDc37e11B68052d1539fa23386eE58Ac444bf5BE1',
+  SentryProtocolFeeController: '0x21be26C65a3E71d2756986D04FDf883F26D69e81',
+  KrakenVerifiedRegistry: '0x54C3405f388E1d9DFbF69e43330F9F73B8EfdB32',
   WETH9: '0x4200000000000000000000000000000000000006',
+  USDT0: '0x0200c29006150606b650577bbe7b6248f58470c1',
+  USDC: '0x2D270e6886d130D724215A266106e6832161EAEd',
+  X402FeeRouter: '0xa1aD9AE09d28C13CBB783e47C7d1B97F96C6711e',
+  X402USDT0FeeRouter: '0x0d1e92c107bB315e425278CD999D90be804F39d6',
   // ERC-8004 Agent Identity
   IdentityRegistry: '0x7274e874CA62410a93Bd8bf61c69d8045E399c02',           // implementation (active)
   IdentityRegistryProxy: '0x8004A169FB4a3325136EB29fA0ceB6D2e539a432',      // proxy (pending upgrade)
@@ -62,7 +68,17 @@ export function getDailyGmPlusMaxDailySpendWei(): bigint | undefined {
 // ── Subgraph ──────────────────────────────────────────────────────────
 // Override via TSUNAMI_SUBGRAPH_URL env var when Goldsky republishes the subgraph.
 export const SUBGRAPH_URL = process.env.TSUNAMI_SUBGRAPH_URL
-  ?? 'https://api.goldsky.com/api/public/project_cmm7vh5xwsa8m01qmdr7w7u62/subgraphs/tsunami-v3/2.2.0/gn';
+  ?? 'https://api.goldsky.com/api/public/project_cmm7vh5xwsa8m01qmdr7w7u62/subgraphs/tsunami-v3/2.4.0/gn';
+
+// ── GM Subgraphs ───────────────────────────────────────────────────────
+// These are not required by the current direct-contract dailygm_* tools, but
+// are exported for downstream analytics tools and future GM leaderboard reads.
+export const DAILY_GM_SUBGRAPH_URL = process.env.DAILY_GM_SUBGRAPH_URL
+  ?? 'https://api.goldsky.com/api/public/project_cmo0uv9q6okpf01zk5gmoaeao/subgraphs/DailyGM/1.1.1/gn';
+export const DAILY_AGENT_GM_SUBGRAPH_URL = process.env.DAILY_AGENT_GM_SUBGRAPH_URL
+  ?? 'https://api.goldsky.com/api/public/project_cmo0uv9q6okpf01zk5gmoaeao/subgraphs/DailyAgentGM/1.0.0/gn';
+export const DAILY_GM_PLUS_SUBGRAPH_URL = process.env.DAILY_GM_PLUS_SUBGRAPH_URL
+  ?? 'https://api.goldsky.com/api/public/project_cmo0uv9q6okpf01zk5gmoaeao/subgraphs/DailyGMPlus/1.0.0/gn';
 
 // ── Sentry backend (token registration) ───────────────────────────────
 // Anonymous POSTs are supported as of the backend change landed in SentryBot
@@ -71,6 +87,11 @@ export const SUBGRAPH_URL = process.env.TSUNAMI_SUBGRAPH_URL
 // posts the launch to this endpoint with the creator wallet address.
 // Override `SENTRY_API_BASE` env var to point at a self-hosted backend.
 export const SENTRY_API_BASE = process.env.SENTRY_API_BASE ?? 'https://web-production-7d3e.up.railway.app';
+
+// ── x402 facilitator ──────────────────────────────────────────────────
+// Optional Railway-hosted facilitator for USDC-denominated x402 payments
+// on Ink. Tools that call the HTTP facilitator require this env var.
+export const X402_FACILITATOR_URL = process.env.X402_FACILITATOR_URL ?? 'https://x402.sentry.trading';
 
 // ── Constants ─────────────────────────────────────────────────────────
 export const DEFAULT_SLIPPAGE_BPS = 50;

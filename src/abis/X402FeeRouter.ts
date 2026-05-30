@@ -1,0 +1,41 @@
+export const X402FeeRouterABI = [
+  {
+    type: "function",
+    name: "settleWithFee",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "payer", type: "address" },
+      { name: "seller", type: "address" },
+      { name: "amount", type: "uint256" },
+      { name: "feeBps", type: "uint16" },
+      { name: "validAfter", type: "uint256" },
+      { name: "validBefore", type: "uint256" },
+      { name: "nonce", type: "bytes32" },
+      { name: "v", type: "uint8" },
+      { name: "r", type: "bytes32" },
+      { name: "s", type: "bytes32" },
+    ],
+    outputs: [
+      { name: "feeAmount", type: "uint256" },
+      { name: "netAmount", type: "uint256" },
+    ],
+  },
+  { type: "function", name: "USDC", stateMutability: "view", inputs: [], outputs: [{ name: "", type: "address" }] },
+  { type: "function", name: "FEE_RECIPIENT", stateMutability: "view", inputs: [], outputs: [{ name: "", type: "address" }] },
+  { type: "function", name: "MAX_FEE_BPS", stateMutability: "view", inputs: [], outputs: [{ name: "", type: "uint16" }] },
+  { type: "function", name: "MIN_FEE", stateMutability: "view", inputs: [], outputs: [{ name: "", type: "uint256" }] },
+  {
+    type: "event",
+    name: "Settled",
+    anonymous: false,
+    inputs: [
+      { name: "payer", type: "address", indexed: true },
+      { name: "seller", type: "address", indexed: true },
+      { name: "grossAmount", type: "uint256", indexed: false },
+      { name: "feeAmount", type: "uint256", indexed: false },
+      { name: "netAmount", type: "uint256", indexed: false },
+      { name: "feeBps", type: "uint16", indexed: false },
+      { name: "nonce", type: "bytes32", indexed: false },
+    ],
+  },
+] as const;

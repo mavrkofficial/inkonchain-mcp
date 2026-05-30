@@ -5,7 +5,7 @@
 
 **The curated Ink ecosystem MCP server** — gives AI agents direct access to the core primitives and protocols on [Ink](https://inkonchain.com), the Kraken-backed Ethereum L2.
 
-Bundles the [Sentry Launch Factory](https://app.mavrk.xyz), [Tsunami V3 DEX](https://nami.ink), ERC-8004 agent identity, ZNS `.ink` domains, the full DailyGM family (DailyGM + DailyAgentGM + DailyGMPlus), Tsunami subgraph analytics, Relay cross-chain swaps, and generic ERC20/WETH utilities into a single MCP server with ~66 tools.
+Bundles the [Sentry Launch Factory](https://sentry.trading), [Tsunami V3 DEX](https://nami.ink), ERC-8004 agent identity, ZNS `.ink` domains, the full DailyGM family (DailyGM + DailyAgentGM + DailyGMPlus), Tsunami subgraph analytics, Relay cross-chain swaps, x402 USDC payment settlement, wallet utilities, guarded contract access, and generic ERC20/WETH utilities into a single MCP server with ~83 tools.
 
 Designed to be installed alongside [`tydro-mcp`](https://www.npmjs.com/package/tydro-mcp) and [`@nadohq/nado-mcp`](https://www.npmjs.com/package/@nadohq/nado-mcp) as the **intro stack to agent tooling for Ink**:
 
@@ -71,7 +71,7 @@ Never in plaintext on disk.
 }
 ```
 
-Restart your MCP client. ~66 tools become available to your agent.
+Restart your MCP client. ~83 tools become available to your agent.
 
 ### 4. (Optional) Set a custom Ink RPC
 
@@ -93,19 +93,27 @@ If you have a private Ink RPC (Gelato, Alchemy, QuickNode, etc.), set it via the
 
 ## Tool Catalog
 
-**~66 tools across 8 modules.** All operate on Ink mainnet (chain ID 57073).
+**~83 tools across 11 modules.** All operate on Ink mainnet (chain ID 57073).
 
-### Sentry Launch Factory (7 tools)
+### Sentry Launch Factory (14 tools)
 
-Permissionless and agent-gated token launches on Ink. Single-sided LP is held permanently inside the factory contract — only fee collection is supported (no withdraw, no remove-liquidity).
+Permissionless, agent-gated, Kraken Verified, and GoPumpMe token launches on Ink. Single-sided LP is held permanently inside the factory contract — only fee collection is supported (no withdraw, no remove-liquidity). Sentry-created pools auto-enable Tsunami protocol fees through the on-chain protocol fee controller.
 
 | Tool | Type | Description |
 |---|---|---|
-| `sentry_launch` | Write | Permissionless token launch. Deploys ERC20, creates Tsunami V3 pool (1% fee tier), mints single-sided LP locked in the factory. |
-| `sentry_launch_agent` | Write | Same as `sentry_launch` but gated by an ERC-8004 identity NFT. Register via `identity_register` first. |
+| `sentry_launch` | Write | Permissionless token launch. Defaults to WETH base. Deploys ERC20, creates Tsunami V3 pool (1% fee tier), mints single-sided LP locked in the factory. |
+| `sentry_launch_agent` | Write | ERC-8004-gated agent launch. Defaults to USDT0 base for agent markets. Register via `identity_register` first. |
+| `sentry_launch_agent_usdt0` | Write | Convenience agent launch that always uses USDT0 as the base asset (~$5K starting FDV via the active USDT0 pool manager). |
+| `sentry_launch_kraken_verified` | Write | Kraken Verified deployer launch. Deploys a registry-gated token whose transfers are checked by the Kraken verification registry. |
+| `sentry_launch_gopumpme` | Write | Kraken Verified deployer launch with open trading. Base-side LP fees route 100% to creator; launched-token-side fees route to treasury. |
 | `sentry_get_creator_nfts` | Read | Get all LP NFT IDs for a creator address. |
 | `sentry_get_token_by_nft` | Read | Get the token address associated with an LP NFT ID. |
-| `sentry_get_supported_base_tokens` | Read | List supported base tokens (e.g. WETH). |
+| `sentry_get_supported_base_tokens` | Read | List supported base tokens (currently WETH and USDT0). |
+| `sentry_get_pool_manager` | Read | Get the pool manager contract for a supported base token. |
+| `sentry_get_factory_config` | Read | Read factory owner, treasury, creator fee bps, registries, protocol fee controller, and supported bases. |
+| `sentry_get_launch_type` | Read | Read agent / Kraken Verified / GoPumpMe flags for an LP NFT token ID. |
+| `sentry_get_agent_launch_readiness` | Read | Check identity NFT, gas balance, base-token balance, base-token support, and pool manager for agent launches. |
+| `sentry_get_creator_fee_status` | Read | List a creator's Sentry LP NFT IDs and current uncollected position fee counters. |
 | `sentry_get_total_deployed` | Read | Total number of tokens deployed through the factory. |
 | `sentry_collect_fees` | Write | Collect accrued trading fees from factory-held LP positions (owner only). |
 
@@ -131,7 +139,7 @@ Uniswap V3-style concentrated liquidity DEX on Ink. The main DEX for Sentry-laun
 | `tsunami_get_position` | Read | Full position details by token ID. |
 | `tsunami_get_user_positions` | Read | All positions owned by an address. |
 
-**Note on fee tiers**: Sentry-launched pools always use the 1% fee tier (`fee: 10000`). Pass `fee: 10000` explicitly when swapping against any Sentry-launched token.
+**Note on fee tiers**: Sentry-launched pools always use the 1% fee tier (`fee: 10000`). Pass `fee: 10000` explicitly when swapping against any Sentry-launched token. Agent USDT0 markets use USDT0 (`0x0200...70c1`) as the base asset and launch around a $5K starting FDV.
 
 ### ERC-8004 Agent Identity (6 tools)
 
@@ -171,6 +179,24 @@ Generic token tools. Universal utilities used by most other modules.
 | `erc20_transfer` | Write | Transfer tokens (or native ETH via the zero address). |
 | `weth_wrap` | Write | Wrap native ETH into WETH. Useful before `tydro_supply` (in tydro-mcp), `nado_deposit` (in nado-mcp), or any tool that needs WETH as input. |
 | `weth_unwrap` | Write | Unwrap WETH back into native ETH. Accepts `"max"` for full balance. |
+
+### Wallet Utilities (2 tools)
+
+Local EVM wallet helpers. These use the same keychain entry as `inkonchain-mcp-setup`.
+
+| Tool | Type | Description |
+|---|---|---|
+| `wallet_address` | Read | Return the configured wallet address and native Ink ETH balance. |
+| `wallet_create` | Write | Generate a fresh EVM wallet and store its private key in the OS keychain. Refuses to overwrite unless `overwrite=true`. |
+
+### Guarded Contract Access (2 tools)
+
+Generic read/write helpers for known Ink protocol ABIs only. These are intentionally not arbitrary calldata tools.
+
+| Tool | Type | Description |
+|---|---|---|
+| `contract_read` | Read | Call allowlisted read functions on known contracts (`erc20`, `sentry`, `tsunami_factory`, `tsunami_pool`, `tsunami_position_manager`, `tsunami_quoter`, `identity`). |
+| `contract_write` | Write | Call allowlisted write functions on known contracts. Refuses arbitrary calldata and unsupported function names. |
 
 ### DailyGM Family (15 tools)
 
@@ -232,6 +258,20 @@ Read-only Goldsky subgraph queries against Tsunami V3. Useful for dashboards, po
 
 The subgraph URL is overridable via `TSUNAMI_SUBGRAPH_URL` env var in case Goldsky republishes.
 
+Default Tsunami subgraph:
+
+`https://api.goldsky.com/api/public/project_cmm7vh5xwsa8m01qmdr7w7u62/subgraphs/tsunami-v3/2.4.0/gn`
+
+### GM Subgraphs
+
+The built-in `dailygm_*` tools read/write directly against the GM contracts. The package also exports the latest GM subgraph URLs for downstream analytics and future leaderboard tools:
+
+| Subgraph | URL |
+|---|---|
+| DailyGM | `https://api.goldsky.com/api/public/project_cmo0uv9q6okpf01zk5gmoaeao/subgraphs/DailyGM/1.1.1/gn` |
+| DailyAgentGM | `https://api.goldsky.com/api/public/project_cmo0uv9q6okpf01zk5gmoaeao/subgraphs/DailyAgentGM/1.0.0/gn` |
+| DailyGMPlus | `https://api.goldsky.com/api/public/project_cmo0uv9q6okpf01zk5gmoaeao/subgraphs/DailyGMPlus/1.0.0/gn` |
+
 ### Relay Protocol (7 tools)
 
 Cross-chain bridging and swap aggregation via [Relay](https://relay.link). Routes across 60+ EVM chains.
@@ -247,6 +287,24 @@ Cross-chain bridging and swap aggregation via [Relay](https://relay.link). Route
 | `relay_execute` | Write | Execute a swap or cross-chain bridge. Works on any EVM chain in `viem/chains` — the same EVM key signs for every EVM chain because addresses are deterministic. |
 
 **Notable**: `relay_execute` is the simplest way to do cross-chain bridges (e.g. `Ink ETH → Base ETH`, `Arbitrum USDC → Ink USDT0`). The one EVM key you configure in the keychain signs for every EVM chain Relay supports.
+
+### x402 Payments on Ink (6 tools)
+
+USDC-denominated x402 v2 payments on Ink through the `X402FeeRouter` and optional Railway facilitator. The facilitator validates EIP-3009 USDC authorizations and can sponsor settlement gas through a self-relayer. A USDT0 router is also deployed and exposed through `x402_router_info`; facilitator settlement support for USDT0 is a follow-up service update.
+
+| Tool | Type | Description |
+|---|---|---|
+| `x402_health` | Read | Health/config status from the configured facilitator. |
+| `x402_supported` | Read | Supported x402 payment requirements (`scheme`, `network`, `asset`, `payTo`). |
+| `x402_quote` | Read | Fee/net quote for a gross USDC amount. |
+| `x402_verify` | Read | Verify an x402 payment payload + requirements. |
+| `x402_settle` | Write | Settle a verified x402 payment through the facilitator and router. |
+| `x402_router_info` | Read | Read router immutables for USDC or USDT0: payment token, fee recipient, max fee bps, min fee. |
+
+Current routers:
+
+- USDC: `0xa1aD9AE09d28C13CBB783e47C7d1B97F96C6711e`
+- USDT0: `0x0d1e92c107bB315e425278CD999D90be804F39d6`
 
 ## MCP Client Setup
 
@@ -321,7 +379,36 @@ Want all the Ink tooling in one session? Add all three MCPs:
 }
 ```
 
-All three coexist with zero tool name collisions. Your agent gets ~66 + 7 + 38 = **~111 Ink ecosystem tools** in one session.
+All three coexist with zero tool name collisions. Your agent gets ~83 + 7 + 38 = **~128 Ink ecosystem tools** in one session.
+
+## Agent Strategy Examples
+
+### Launch an ERC-8004 agent token on USDT0
+
+1. `wallet_address` — confirm the agent wallet and ETH gas balance.
+2. `identity_check_registered` — verify the wallet holds an ERC-8004 identity NFT.
+3. `sentry_get_agent_launch_readiness` — confirm USDT0 base support and pool manager.
+4. `sentry_launch_agent_usdt0` — launch the token against USDT0.
+5. `sentry_get_launch_type` — confirm the LP NFT is marked as an agent launch.
+
+### Monitor a newly launched pool
+
+1. `sentry_get_token_by_nft` — get the token address from LP NFT ID.
+2. `tsunami_get_pool` — find the TOKEN/USDT0 pool at fee tier `10000`.
+3. `tsunami_get_pool_info` — read tick/liquidity/current pool state.
+4. `subgraph_recent_swaps` — monitor trading activity.
+
+### Buy back an agent token with USDT0
+
+1. `erc20_balance` — check USDT0 balance.
+2. `tsunami_quote_exact_input` — quote USDT0 → agent token.
+3. `tsunami_swap_exact_input` — execute the buy.
+
+### Check and collect creator rewards
+
+1. `sentry_get_creator_fee_status` — inspect LP NFTs and uncollected fee counters.
+2. `sentry_collect_fees` — owner-only collection from factory-held LP positions.
+3. `erc20_balance` — confirm creator USDT0 balance after collection.
 
 ## Security & Key Management
 
@@ -371,6 +458,7 @@ All optional unless noted.
 | `RPC_URL` | `https://rpc-gel.inkonchain.com` | Custom Ink RPC endpoint. |
 | `EVM_RPC_OVERRIDES` | — | JSON map from chainId → RPC URL. Overrides the default RPC for any EVM chain used by `relay_execute` cross-chain bridging (e.g. `{"8453":"https://base-mainnet.g.alchemy.com/v2/..."}`). |
 | `TSUNAMI_SUBGRAPH_URL` | Latest known-good Goldsky URL | Override the Tsunami subgraph endpoint. Useful if Goldsky republishes. |
+| `X402_FACILITATOR_URL` | `https://x402.sentry.trading` | Facilitator base URL for `x402_health`, `x402_supported`, `x402_quote`, `x402_verify`, and `x402_settle`. |
 | `MOLTING_API_KEY` | — | Optional. If set, Sentry launches are registered with the indexer under the caller's MOLTING agent account in addition to the public Ink ecosystem indexer. Not required — anonymous launches are fully supported. |
 | `SENTRY_API_BASE` | `https://web-production-7d3e.up.railway.app` | Override the backend URL used for token registration. |
 | `DAILYGM_PLUS_MAX_DAILY_SPEND_WEI` | — | Optional safety cap for `dailygm_plus_*` write tools. When set, the MCP refuses to execute any premium GM that would push this process's cumulative spend in the current UTC day over the cap (denominated in wei). Defaults to unlimited. Example: `5000000000000000` = 0.005 ETH/day = 10 premium calls. The counter is process-local and resets on MCP restart. |

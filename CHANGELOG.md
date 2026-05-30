@@ -2,6 +2,51 @@
 
 All notable changes to `inkonchain-mcp` are documented in this file.
 
+## Unreleased
+
+### Sentry Launch Factory expansion
+
+- Added `sentry_launch_agent_usdt0` for ERC-8004-gated agent launches that default to USDT0 markets.
+- Added `sentry_launch_kraken_verified` for Kraken Verified deployer launches with registry-gated token transfers.
+- Added `sentry_launch_gopumpme` for Kraken Verified deployers with open trading and 100% base-side LP fees routed to the creator.
+- Added read tools:
+  - `sentry_get_pool_manager`
+  - `sentry_get_factory_config`
+  - `sentry_get_launch_type`
+  - `sentry_get_agent_launch_readiness`
+  - `sentry_get_creator_fee_status`
+- Updated Sentry ABI for:
+  - `launchKrakenVerified`
+  - `launchGoPumpMe`
+  - `creatorFeeBps`
+  - `protocolFeeController`
+  - `krakenVerifiedRegistry`
+  - `isKrakenVerifiedPosition`
+  - `isGoPumpMePosition`
+  - `CreatorFeePaid`
+  - `KrakenVerifiedTokenDeployed`
+  - `GoPumpMeTokenDeployed`
+- Added contract constants for USDT0, Kraken Verified registry, and Sentry protocol fee controller.
+- Updated Sentry fee docs: base-token-side LP fees route to creator/treasury, launched-token-side fees route to treasury, and GoPumpMe base-side LP fees route 100% to creator.
+- Updated the default Tsunami subgraph URL to `tsunami-v3/2.4.0`.
+- Exported latest DailyGM, DailyAgentGM, and DailyGMPlus subgraph URLs for downstream analytics tooling.
+- Added wallet utility tools:
+  - `wallet_address`
+  - `wallet_create`
+- Added guarded generic contract tools:
+  - `contract_read`
+  - `contract_write`
+- Added x402 payment tools for the Ink USDC facilitator/router:
+  - `x402_health`
+  - `x402_supported`
+  - `x402_quote`
+  - `x402_verify`
+  - `x402_settle`
+  - `x402_router_info`
+- Defaulted `X402_FACILITATOR_URL` to `https://x402.sentry.trading`.
+- Added the deployed USDT0 x402 router constant and `x402_router_info({ asset: "USDT0" })` support. Facilitator `/supported` and `/settle` remain USDC-only until the service is updated for multi-asset routing.
+- Added README strategy examples for launching an agent token, monitoring a pool, buying back with USDT0, and checking/collecting creator rewards.
+
 ## [1.2.0] — 2026-04-21
 
 ### New: native `.ink` domain resolution in every `dailygm_*_to` tool

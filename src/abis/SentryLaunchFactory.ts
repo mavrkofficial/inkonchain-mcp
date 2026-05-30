@@ -11,6 +11,18 @@ export const SentryLaunchFactoryABI = [
     inputs: [{ name: "_name", type: "string" }, { name: "_symbol", type: "string" }, { name: "baseToken", type: "address" }],
     outputs: [{ name: "tokenAddress", type: "address" }, { name: "tokenId", type: "uint256" }],
   },
+  // ── Launch Kraken Verified (verified deployer + restricted-transfer token) ──
+  {
+    type: "function", name: "launchKrakenVerified", stateMutability: "nonpayable",
+    inputs: [{ name: "_name", type: "string" }, { name: "_symbol", type: "string" }, { name: "baseToken", type: "address" }],
+    outputs: [{ name: "tokenAddress", type: "address" }, { name: "tokenId", type: "uint256" }],
+  },
+  // ── Launch GoPumpMe (verified deployer + open trading + 100% base-side creator LP fees) ──
+  {
+    type: "function", name: "launchGoPumpMe", stateMutability: "nonpayable",
+    inputs: [{ name: "_name", type: "string" }, { name: "_symbol", type: "string" }, { name: "baseToken", type: "address" }],
+    outputs: [{ name: "tokenAddress", type: "address" }, { name: "tokenId", type: "uint256" }],
+  },
   // ── Fee Collection (owner only) ──
   {
     type: "function", name: "collectFees", stateMutability: "nonpayable",
@@ -50,11 +62,31 @@ export const SentryLaunchFactoryABI = [
     inputs: [{ name: "baseToken", type: "address" }], outputs: [{ name: "", type: "address" }],
   },
   {
+    type: "function", name: "creatorFeeBps", stateMutability: "view",
+    inputs: [], outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function", name: "protocolFeeController", stateMutability: "view",
+    inputs: [], outputs: [{ name: "", type: "address" }],
+  },
+  {
+    type: "function", name: "krakenVerifiedRegistry", stateMutability: "view",
+    inputs: [], outputs: [{ name: "", type: "address" }],
+  },
+  {
     type: "function", name: "getTrustedForwarder", stateMutability: "view",
     inputs: [], outputs: [{ name: "", type: "address" }],
   },
   {
     type: "function", name: "isAgentPosition", stateMutability: "view",
+    inputs: [{ name: "tokenId", type: "uint256" }], outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function", name: "isKrakenVerifiedPosition", stateMutability: "view",
+    inputs: [{ name: "tokenId", type: "uint256" }], outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function", name: "isGoPumpMePosition", stateMutability: "view",
     inputs: [{ name: "tokenId", type: "uint256" }], outputs: [{ name: "", type: "bool" }],
   },
   {
@@ -106,6 +138,34 @@ export const SentryLaunchFactoryABI = [
       { name: "tokenId", type: "uint256", indexed: true },
       { name: "amount0", type: "uint256", indexed: false },
       { name: "amount1", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "event", name: "CreatorFeePaid", anonymous: false,
+    inputs: [
+      { name: "tokenId", type: "uint256", indexed: true },
+      { name: "creator", type: "address", indexed: true },
+      { name: "wethAmount", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "event", name: "KrakenVerifiedTokenDeployed", anonymous: false,
+    inputs: [
+      { name: "token", type: "address", indexed: true },
+      { name: "name", type: "string", indexed: false },
+      { name: "symbol", type: "string", indexed: false },
+      { name: "creator", type: "address", indexed: true },
+      { name: "tokenId", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "event", name: "GoPumpMeTokenDeployed", anonymous: false,
+    inputs: [
+      { name: "token", type: "address", indexed: true },
+      { name: "name", type: "string", indexed: false },
+      { name: "symbol", type: "string", indexed: false },
+      { name: "creator", type: "address", indexed: true },
+      { name: "tokenId", type: "uint256", indexed: false },
     ],
   },
   {

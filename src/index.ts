@@ -16,6 +16,9 @@ import { relayTools, handleRelayTool } from './tools/relay.js';
 import { znsTools, handleZnsTool } from './tools/zns.js';
 import { identityTools, handleIdentityTool } from './tools/identity.js';
 import { dailyGmTools, handleDailyGmTool } from './tools/dailygm.js';
+import { walletTools, handleWalletTool } from './tools/wallet.js';
+import { contractTools, handleContractTool } from './tools/contract.js';
+import { x402Tools, handleX402Tool } from './tools/x402.js';
 
 // ── All Tools ──────────────────────────────────────────────────────────
 const allTools = [
@@ -27,6 +30,9 @@ const allTools = [
   ...znsTools,
   ...identityTools,
   ...dailyGmTools,
+  ...walletTools,
+  ...contractTools,
+  ...x402Tools,
 ];
 
 // ── Route tool calls ───────────────────────────────────────────────────
@@ -40,6 +46,9 @@ async function handleToolCall(name: string, args: Record<string, unknown>): Prom
   if (name.startsWith('zns_'))      return handleZnsTool(name, args);
   if (name.startsWith('identity_')) return handleIdentityTool(name, args);
   if (name.startsWith('dailygm_'))  return handleDailyGmTool(name, args);
+  if (name.startsWith('wallet_'))   return handleWalletTool(name, args);
+  if (name.startsWith('contract_')) return handleContractTool(name, args);
+  if (name.startsWith('x402_'))     return handleX402Tool(name, args);
   throw new Error(`Unknown tool: ${name}`);
 }
 
