@@ -88,7 +88,7 @@ export const relayTools = [
   },
   {
     name: 'relay_get_quote',
-    description: 'Get a quote for a cross-chain bridge or swap via Relay. Returns fees, estimated output, and executable steps. The `user` field defaults to the configured Ink/EVM wallet; pass `user` explicitly if querying for a non-Ink address. The `recipient` field defaults to the Ink/EVM wallet for EVM destinations.',
+    description: 'Get a quote for a same-chain swap or cross-chain bridge via Relay. On Ink, this is the best-route/best-price source for any token that is NOT a Sentry-launched or Tsunami-native pair (use the tsunami_* tools for those). Returns fees, estimated output, and executable steps. The `user` field defaults to the configured Ink/EVM wallet; pass `user` explicitly if querying for a non-Ink address. The `recipient` field defaults to the Ink/EVM wallet for EVM destinations.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -147,7 +147,7 @@ export const relayTools = [
   },
   {
     name: 'relay_execute',
-    description: 'Execute a same-chain swap or cross-chain bridge via Relay Protocol routing. Fetches a Relay quote, then signs and submits every transaction in the returned quote.steps using the configured EVM wallet. Supported origins: any of the 60+ EVM chains in viem/chains (Ink, Base, Arbitrum, Optimism, Ethereum mainnet, Polygon, BNB, Avalanche, Linea, Scroll, zkSync, Blast, Berachain, Mantle, etc.) — the same locally-held EVM private key signs for every EVM chain because addresses are derived deterministically from the keypair. Destination can be any EVM chain Relay supports. Useful for: (a) same-chain swaps where local DEX liquidity is thin (e.g. ETH→USDT0 on Ink where Tsunami pools are shallow), (b) cross-chain bridges between any two EVM chains using a single private key. Per-chain RPC URLs default to viem\'s baked-in defaults but can be overridden via the EVM_RPC_OVERRIDES env var (JSON map from chainId to RPC URL). Cross-chain bridges originating from non-EVM chains (Solana, Bitcoin, Tron, Hyperliquid, Lighter) are not supported — fetch a quote via relay_get_quote and submit the origin tx with the wallet on that chain.',
+    description: 'Execute a same-chain swap or cross-chain bridge via Relay Protocol routing. Fetches a Relay quote, then signs and submits every transaction in the returned quote.steps using the configured EVM wallet. Supported origins: any of the 60+ EVM chains in viem/chains (Ink, Base, Arbitrum, Optimism, Ethereum mainnet, Polygon, BNB, Avalanche, Linea, Scroll, zkSync, Blast, Berachain, Mantle, etc.) — the same locally-held EVM private key signs for every EVM chain because addresses are derived deterministically from the keypair. Destination can be any EVM chain Relay supports. Useful for: (a) best-route same-chain swaps on Ink for any token that is NOT a Sentry-launched or Tsunami-native pair — Relay finds the best price/route across Ink liquidity, while Sentry/Tsunami-native tokens should be traded with the tsunami_* tools, (b) cross-chain bridges between any two EVM chains using a single private key. Per-chain RPC URLs default to viem\'s baked-in defaults but can be overridden via the EVM_RPC_OVERRIDES env var (JSON map from chainId to RPC URL). Cross-chain bridges originating from non-EVM chains (Solana, Bitcoin, Tron, Hyperliquid, Lighter) are not supported — fetch a quote via relay_get_quote and submit the origin tx with the wallet on that chain.',
     inputSchema: {
       type: 'object' as const,
       properties: {

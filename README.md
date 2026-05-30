@@ -3,9 +3,11 @@
 ![version](https://img.shields.io/npm/v/inkonchain-mcp?color=blue)
 ![license](https://img.shields.io/npm/l/inkonchain-mcp?color=green)
 
-**The curated Ink ecosystem MCP server** — gives AI agents direct access to the core primitives and protocols on [Ink](https://inkonchain.com), the Kraken-backed Ethereum L2.
+**The curated Ink ecosystem MCP server** — gives AI agents direct access to the Ink-native products and ecosystem primitives on [Ink](https://inkonchain.com), the Kraken-backed Ethereum L2.
 
-Bundles the [Sentry Launch Factory](https://sentry.trading), [Tsunami V3 DEX](https://nami.ink), ERC-8004 agent identity, ZNS `.ink` domains, the full DailyGM family (DailyGM + DailyAgentGM + DailyGMPlus), free Tsunami subgraph analytics, free composed premium analytics, Relay cross-chain swaps, x402 USDC/USDT0 payments, wallet utilities, guarded contract access, and generic ERC20/WETH utilities into a single MCP server with ~93 tools.
+Bundles the [Sentry Launch Factory](https://sentry.trading), [Tsunami V3 DEX](https://nami.ink), ERC-8004 agent identity, ZNS `.ink` domains, the full DailyGM family (DailyGM + DailyAgentGM + DailyGMPlus), free Tsunami subgraph analytics, free composed premium analytics, Relay best-price swap routing + cross-chain bridging, x402 USDC/USDT0 payments, wallet utilities, guarded contract access, and generic ERC20/WETH utilities into a single MCP server with ~93 tools.
+
+> **Tsunami + Sentry vs. Relay — which to use.** Tsunami and Sentry are Ink-native products (Sentry is multichain-capable but native to Ink) that **aren't indexed by any DEX aggregator** — that's exactly why this MCP ships first-class tools for them. Every Sentry-launched token, and every token natively paired on Tsunami, lives on the **Tsunami V3 DEX** — use the `tsunami_*` tools for those. For just about **everything else on Ink**, the **Relay** tools find the best token price and swap route (and bridge cross-chain). Rule of thumb: **Tsunami for Sentry launches + Tsunami-native pairs; Relay for best-route swaps on everything else.**
 
 Designed to be installed alongside [`tydro-mcp`](https://www.npmjs.com/package/tydro-mcp) and [`@nadohq/nado-mcp`](https://www.npmjs.com/package/@nadohq/nado-mcp) as the **intro stack to agent tooling for Ink**:
 
@@ -292,7 +294,7 @@ The built-in `dailygm_*` tools read/write directly against the GM contracts. The
 
 ### Relay Protocol (7 tools)
 
-Cross-chain bridging and swap aggregation via [Relay](https://relay.link). Routes across 60+ EVM chains.
+**Best-price swap routing and quotes on Ink**, plus cross-chain bridging, via [Relay](https://relay.link). Relay finds the best route/quote for just about any token on Ink that **isn't** a Sentry-launched or Tsunami-native pair (those go through the `tsunami_*` tools) — and it bridges across 60+ EVM chains from a single EVM key.
 
 | Tool | Type | Description |
 |---|---|---|
@@ -304,7 +306,7 @@ Cross-chain bridging and swap aggregation via [Relay](https://relay.link). Route
 | `relay_get_requests` | Read | Transaction status and history. |
 | `relay_execute` | Write | Execute a swap or cross-chain bridge. Works on any EVM chain in `viem/chains` — the same EVM key signs for every EVM chain because addresses are deterministic. |
 
-**Notable**: `relay_execute` is the simplest way to do cross-chain bridges (e.g. `Ink ETH → Base ETH`, `Arbitrum USDC → Ink USDT0`). The one EVM key you configure in the keychain signs for every EVM chain Relay supports.
+**Notable**: on Ink, reach for Relay for best-route swaps of any token that isn't a Sentry/Tsunami-native pair, and for cross-chain bridges (e.g. `Ink ETH → Base ETH`, `Arbitrum USDC → Ink USDT0`). The one EVM key you configure in the keychain signs for every EVM chain Relay supports.
 
 ### x402 Payments on Ink (7 tools)
 

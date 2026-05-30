@@ -5,7 +5,7 @@ description: Swap tokens on the Tsunami V3 DEX on Ink — quote, then execute ex
 
 # Trade on Tsunami (V3 DEX)
 
-Tsunami is a Uniswap V3-style concentrated-liquidity DEX — the main venue for Sentry-launched tokens. Always **quote first, then swap**.
+Tsunami is a Uniswap V3-style concentrated-liquidity DEX and an Ink-native product — the venue for **Sentry-launched tokens and Tsunami-native pairs**. Because Tsunami isn't indexed by DEX aggregators, agents need these dedicated `tsunami_*` tools to reach it. For any other token on Ink, use Relay for best-route swaps ([`bridge-with-relay`](../bridge-with-relay/SKILL.md)). Always **quote first, then swap**.
 
 ## Prerequisites
 
@@ -56,7 +56,7 @@ Use the **WETH address** (`0x4200000000000000000000000000000000000006`) as `toke
 
 - **Wrong fee tier = "pool not found"** or a bad route. Use `10000` for Sentry tokens.
 - **Decimals**: USDT0/USDC are 6 decimals, most launched tokens and WETH are 18. Always compute `amountIn` in base units.
-- **Thin liquidity**: for low-liquidity pairs (e.g. ETH↔USDT0), `relay_execute` ([`bridge-with-relay`](../bridge-with-relay/SKILL.md)) may give a better route than a direct Tsunami swap.
+- **Not a Sentry/Tsunami-native token?** Don't force it through Tsunami — `relay_execute` ([`bridge-with-relay`](../bridge-with-relay/SKILL.md)) finds the best route for everything else on Ink (and helps when a Tsunami pair like ETH↔USDT0 is thin).
 - **Slippage**: a quote is not a guarantee — set `slippageBps` sensibly and re-quote if the tx is delayed.
 
 ## Done when

@@ -1,11 +1,21 @@
 ---
 name: bridge-with-relay
-description: Move funds onto/off Ink and swap across 60+ EVM chains using Relay. Use when an agent needs to bridge ETH/tokens between chains, fund an Ink wallet from another chain, or get a better route than thin local DEX liquidity (e.g. ETH↔USDT0 on Ink).
+description: Best-price token swap routing on Ink + cross-chain bridging across 60+ EVM chains, using Relay. Use when an agent needs the best route/quote for a token on Ink that ISN'T a Sentry-launched or Tsunami-native pair, to bridge ETH/tokens between chains, or to fund an Ink wallet from another chain.
 ---
 
-# Bridge and cross-chain swap with Relay
+# Best-price routing + bridging with Relay
 
-Relay routes swaps and bridges across 60+ EVM chains. The single locally-held EVM key signs on **every** EVM chain (addresses are deterministic), so one wallet bridges anywhere.
+Relay does two jobs here:
+
+1. **Best-price swap routing on Ink.** For just about any token on Ink that is **not** a Sentry-launched token or a Tsunami-native pair, Relay finds the best price/route across Ink liquidity. (Sentry/Tsunami-native pairs aren't indexed by DEX aggregators — trade those with the `tsunami_*` tools; see [`trade-on-tsunami`](../trade-on-tsunami/SKILL.md).)
+2. **Cross-chain bridging** across 60+ EVM chains.
+
+The single locally-held EVM key signs on **every** EVM chain (addresses are deterministic), so one wallet routes and bridges anywhere.
+
+## Division of labor on Ink
+
+- **Sentry-launched token or Tsunami-native pair?** → `tsunami_*` tools.
+- **Anything else on Ink (or any cross-chain move)?** → Relay finds the best route/quote.
 
 ## Prerequisites
 
@@ -42,9 +52,9 @@ Ink `57073` · Ethereum `1` · Base `8453` · Arbitrum `42161` · Optimism `10` 
 
 `relay_get_requests({ hash })` or `{ user }` → confirm the bridge completed on the destination.
 
-## Same-chain swap use case
+## Same-chain (Ink) best-route swap
 
-`relay_execute` with `originChainId === destinationChainId` does a same-chain swap — useful on Ink for **ETH ↔ USDT0** where direct Tsunami liquidity is thin. Set both to `57073`.
+`relay_execute` with `originChainId === destinationChainId === 57073` does a same-chain swap on Ink, routed for best price. Use it for any Ink token that isn't a Sentry-launched or Tsunami-native pair (e.g. **ETH ↔ USDT0**, or any aggregator-listed token). Quote with `relay_get_quote`/`relay_get_price` (both chain IDs `57073`) first to compare the route.
 
 ## Gotchas
 

@@ -21,7 +21,7 @@ Each skill is a self-contained `SKILL.md` with YAML frontmatter (`name`, `descri
 | Check and collect the creator fees you earn | [`earn-and-collect-creator-fees`](earn-and-collect-creator-fees/SKILL.md) | `sentry_get_creator_fee_status`, `sentry_collect_fees` |
 | Swap tokens on the DEX | [`trade-on-tsunami`](trade-on-tsunami/SKILL.md) | `tsunami_quote_*`, `tsunami_swap_*` |
 | Provide concentrated liquidity | [`provide-liquidity`](provide-liquidity/SKILL.md) | `tsunami_create_pool`, `tsunami_mint_position`, `tsunami_collect_fees` |
-| Bridge / swap across chains | [`bridge-with-relay`](bridge-with-relay/SKILL.md) | `relay_get_quote`, `relay_execute` |
+| Best-route swaps on Ink (non-Sentry/Tsunami tokens) + cross-chain bridging | [`bridge-with-relay`](bridge-with-relay/SKILL.md) | `relay_get_quote`, `relay_execute` |
 | Pay (and get paid) in stablecoins | [`accept-x402-payments`](accept-x402-payments/SKILL.md) | `x402_pay`, `x402_settle`, `x402_router_info` |
 | Charge for your own resource/API (merchant side) | [`charge-x402-payments`](charge-x402-payments/SKILL.md) | `x402_verify`, `x402_settle`, `x402_router_info` |
 | Read protocol/pool/wallet analytics | [`analytics-with-subgraph`](analytics-with-subgraph/SKILL.md) | `subgraph_*`, `analytics_token_report` |
@@ -36,6 +36,7 @@ These apply to every skill:
 - **Network**: Ink mainnet, chain ID `57073`. Block explorer: `https://explorer.inkonchain.com`.
 - **Amounts are base units** ("wei"), not decimal. ETH/WETH have **18 decimals**; **USDC and USDT0 have 6 decimals**. So `1 USDT0 = "1000000"`, `0.05 USDC = "50000"`, `1 ETH = "1000000000000000000"`.
 - **Native ETH** is represented as the zero address `0x0000000000000000000000000000000000000000` in `erc20_balance` / `erc20_transfer`.
+- **Tsunami vs. Relay (which venue):** Tsunami and Sentry are Ink-native products that **aren't indexed by DEX aggregators**, so trade **Sentry-launched tokens and Tsunami-native pairs** with the `tsunami_*` tools. For **any other token on Ink**, use **Relay** (`relay_*`) for the best price/route — Relay also handles cross-chain bridging.
 - **Sentry-launched pools always use the 1% fee tier** — pass `fee: 10000` to any Tsunami tool that touches a Sentry-launched token. **Exception:** the `SENTRY` ecosystem token (`0xb3C4FB17a34925CA907EFF851FcD176e2801FdAA`) was created outside the factory and trades as **WETH/SENTRY at the 2% tier** (`fee: 20000`) — base may move to USDT0 later.
 - **Reads are free and safe.** Writes move real funds — always confirm parameters before approving.
 - **The wallet key is local.** It lives in your OS keychain (or `EVM_PRIVATE_KEY`) and never leaves the machine; the model only sees tool results.
