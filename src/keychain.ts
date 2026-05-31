@@ -44,9 +44,14 @@ export async function getPrivateKey(): Promise<string | null> {
 export async function storePrivateKey(key: string): Promise<void> {
   const keytar = await loadKeytar();
   await keytar.setPassword(SERVICE, ACCOUNT, key);
+  // Invalidate the in-memory cache so the next getPrivateKey() re-resolves to the
+  // newly stored key. Without this, a wallet_create within a running server would
+  // keep signing as the previously cached wallet until the process restarts.
+  _cached = undefined;
 }
 
 export async function deletePrivateKey(): Promise<void> {
   const keytar = await loadKeytar();
   await keytar.deletePassword(SERVICE, ACCOUNT);
+  _cached = undefined; // invalidate cache so the next read re-resolves
 }

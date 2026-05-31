@@ -55,6 +55,11 @@ export async function handleWalletTool(name: string, args: Record<string, unknow
         warning: args.revealPrivateKey === true
           ? 'Store this private key securely. It will not be shown again unless exported from your keychain.'
           : undefined,
+        // Surface the precedence footgun: a set EVM_PRIVATE_KEY overrides the keychain,
+        // so a freshly created keychain wallet would silently not be used until it's removed.
+        ...(process.env.EVM_PRIVATE_KEY
+          ? { note: 'EVM_PRIVATE_KEY is set and takes precedence over the keychain — this new wallet will NOT be used until that env var is removed.' }
+          : {}),
       };
     }
 
