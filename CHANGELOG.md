@@ -2,6 +2,14 @@
 
 All notable changes to `inkonchain-mcp` are documented in this file.
 
+## [1.3.2] — 2026-05-31
+
+### Skill upgrades + Claude Code plugin
+
+- **Upgraded all 14 skills to a richer, self-describing format.** Each `SKILL.md` now carries full frontmatter — `license`, `metadata` (author/version/homepage/network), `credentials` (the wallet-key dependency), and `requires` (the `inkonchain` MCP server + that skill's exact tool list + optional env) — plus discovery triggers in the description and a new **`## Worked example`** section with real Ink addresses, correct fee tiers/decimals, and tool I/O verified against `src/tools/*.ts`. Skill bodies are otherwise unchanged.
+- Documented the skill **frontmatter schema + body convention for contributors** in `skills/README.md` (field table, copy-paste template, and the YAML pitfalls to avoid).
+- **Added a Claude Code plugin marketplace.** The repo now doubles as a single-plugin marketplace: `/plugin marketplace add mavrkofficial/inkonchain-mcp` then `/plugin install ink@inkonchain` delivers a skill-router agent (`ink-agent`), six slash commands (`/ink:launch-token`, `/ink:trade`, `/ink:bridge`, `/ink:gm`, `/ink:analytics`, `/ink:pay`), the 14 bundled skills, and the `inkonchain` MCP server (wired via `npx`) in one step. Plugin files live at the repo root, reuse `skills/` in place, and are excluded from the npm tarball.
+
 ## [1.3.1] — 2026-05-30
 
 ### Skills + positioning
