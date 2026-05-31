@@ -1,6 +1,21 @@
 ---
 name: trade-on-tsunami
-description: Swap tokens on the Tsunami V3 DEX on Ink — quote, then execute exact-input or exact-output swaps with slippage control and correct fee tiers. Use when an agent or user wants to buy/sell a token, including buybacks of a launched token.
+description: Swap tokens on the Tsunami V3 DEX on Ink — quote, then execute exact-input or exact-output swaps with slippage control and correct fee tiers. Use when an agent or user wants to buy/sell a token, do a buyback of a launched token, or convert between Sentry/Tsunami-native pairs. Triggers include "swap on Ink", "buy <token>", "sell <token>", "buyback", "trade on Tsunami".
+license: MIT
+metadata:
+  author: MAVRK
+  version: "1.0.0"
+  homepage: "https://github.com/mavrkofficial/inkonchain-mcp"
+  network: "Ink mainnet (chain 57073)"
+credentials:
+  - name: EVM wallet key
+    description: "EVM private key in the OS keychain (set via `npx inkonchain-mcp-setup`) or the EVM_PRIVATE_KEY env var. Required for swaps (writes); quotes and balance reads work without it."
+    required: false
+    storage: keychain
+requires:
+  mcp: inkonchain
+  tools: [tsunami_get_pool, tsunami_quote_exact_input, tsunami_quote_exact_output, tsunami_swap_exact_input, tsunami_swap_exact_output, erc20_balance]
+  env: []
 ---
 
 # Trade on Tsunami (V3 DEX)
@@ -43,6 +58,29 @@ Common tiers: `500`, `3000`, `10000` — and Tsunami also supports `20000` (2%).
 ### 4. Confirm
 
 `erc20_balance({ token: TOKEN })` → confirm you received the token.
+
+## Worked example — buy a Sentry-launched token with 5 USDT0
+
+Replace `TOKEN` with the launched token's address. Sentry pools are always the 1% tier (`fee: 10000`). The field **values** below are illustrative; the field **names** match the real tool output.
+
+1. **Confirm the pool exists**
+   `tsunami_get_pool({ tokenA: "0x0200c29006150606b650577bbe7b6248f58470c1", tokenB: "TOKEN", fee: 10000 })`
+   → `{ "poolAddress": "0x1a2b…", "exists": true, "token0": "0x0200…c1", "token1": "TOKEN", "sqrtPriceX96": "…", "tick": -34512, "liquidity": "…" }`
+
+2. **Quote** — 5 USDT0 in (USDT0 is 6 decimals → `"5000000"`)
+   `tsunami_quote_exact_input({ tokenIn: "0x0200c29006150606b650577bbe7b6248f58470c1", tokenOut: "TOKEN", amountIn: "5000000", fee: 10000 })`
+   → `{ "amountOut": "987654321000000000000", "sqrtPriceX96After": "…", "ticksCrossed": 1, "gasEstimate": "210000" }`
+
+3. **Swap** — 0.5% slippage (`slippageBps: 50`)
+   `tsunami_swap_exact_input({ tokenIn: "0x0200c29006150606b650577bbe7b6248f58470c1", tokenOut: "TOKEN", amountIn: "5000000", fee: 10000, slippageBps: 50 })`
+   → `{ "hash": "0xabc…", "status": "success", "expectedOut": "987654321000000000000", "amountOutMinimum": "982715549…" }`
+
+4. **Confirm receipt**
+   `erc20_balance({ token: "TOKEN" })`
+   → `{ "balance": "987654321000000000000", "decimals": 18, "symbol": "TOKEN", "formatted": "987.65", "owner": "0x…" }`
+
+**SENTRY exception** — the ecosystem `SENTRY` token trades as **WETH/SENTRY at the 2% tier** (`fee: 20000`), not USDT0 at 1%. To buy 1 ETH worth:
+`tsunami_quote_exact_input({ tokenIn: "0x4200000000000000000000000000000000000006", tokenOut: "0xb3C4FB17a34925CA907EFF851FcD176e2801FdAA", amountIn: "1000000000000000000", fee: 20000 })`
 
 ## Exact-output variant
 

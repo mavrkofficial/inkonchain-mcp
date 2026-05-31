@@ -1,6 +1,21 @@
 ---
 name: ink-domains-zns
-description: Resolve and register .ink domains (ZNS) on Ink. Use when an agent needs to turn a .ink name into an address (or vice versa), check availability, price, or register a name — e.g. to give an agent a human-readable identity or to resolve a recipient before sending.
+description: Resolve and register .ink domains (ZNS) on Ink. Use when an agent needs to turn a .ink name into an address (or vice versa), check availability, price, or register a name — e.g. to give an agent a human-readable identity or to resolve a recipient before sending. Triggers include "register a .ink domain", "resolve <name>.ink", "is <name> available", "domain price", "give my agent a name".
+license: MIT
+metadata:
+  author: MAVRK
+  version: "1.0.0"
+  homepage: "https://github.com/mavrkofficial/inkonchain-mcp"
+  network: "Ink mainnet (chain 57073)"
+credentials:
+  - name: EVM wallet key
+    description: "EVM private key in the OS keychain (set via `npx inkonchain-mcp-setup`) or the EVM_PRIVATE_KEY env var. Required for registration (a write); resolution and price/availability reads work without it."
+    required: false
+    storage: keychain
+requires:
+  mcp: inkonchain
+  tools: [zns_resolve_domain, zns_resolve_address, zns_check_domain, zns_get_price, zns_register, zns_get_metadata]
+  env: []
 ---
 
 # `.ink` domains (ZNS)
@@ -29,6 +44,25 @@ ZNS is Ink's native name service. Every wallet can own one or more `.ink` names 
 3. `zns_register({ domains: ["myagent"], years: 1 })` — registers to your wallet (or pass `owners` to assign).
 
 Then reference it in your ERC-8004 identity metadata (`{ key: "domain", value: "myagent.ink" }`) — see [`register-agent-identity`](../register-agent-identity/SKILL.md).
+
+## Worked example — register `myagent.ink`
+
+Field values illustrative; field names match the real tool output.
+
+1. **Available?**
+   `zns_check_domain({ domain: "myagent" })`
+   → `{ "domain": "myagent.ink", "available": true, "currentOwner": null }`
+
+2. **Price it** (per-year × years)
+   `zns_get_price({ domains: ["myagent"], years: 1 })`
+   → `{ "domains": ["myagent.ink"], "years": 1, "prices": [{ "domain": "myagent.ink", "pricePerYearETH": "0.003000", "totalETH": "0.003000" }], "totalPriceETH": "0.003000", "totalPriceWei": "3000000000000000" }`
+
+3. **Register** (to your wallet; a write, pays the fee in ETH)
+   `zns_register({ domains: ["myagent"], years: 1 })`
+   → `{ "domains": ["myagent.ink"], "owners": ["0xA11ce…"], "years": 1, "totalPriceETH": "0.003000", "txHash": "0x…", "status": "success" }`
+
+4. **Resolve to confirm**
+   `zns_resolve_domain({ domain: "myagent.ink" })` → `{ "domain": "myagent.ink", "address": "0xA11ce…", "found": true }`
 
 ## Gotchas
 

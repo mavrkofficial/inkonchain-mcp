@@ -1,6 +1,22 @@
 ---
 name: charge-x402-payments
-description: Stand up your own x402-paywalled endpoint on Ink (the merchant/seller side) — gate a resource or API behind an HTTP 402 Payment Required, accept a client's signed EIP-3009 payment, and settle it through the Ink facilitator so you receive USDT0/USDC. Use when an agent or service wants to CHARGE for access, not pay for it. The payer-side counterpart is `accept-x402-payments`.
+description: Stand up your own x402-paywalled endpoint on Ink (the merchant/seller side) — gate a resource or API behind an HTTP 402 Payment Required, accept a client's signed EIP-3009 payment, and settle it through the Ink facilitator so you receive USDT0/USDC. Use when an agent or service wants to CHARGE for access, not pay for it. The payer-side counterpart is `accept-x402-payments`. Triggers include "charge for my API", "x402 paywall", "402 Payment Required", "monetize my endpoint", "get paid in USDT0".
+license: MIT
+metadata:
+  author: MAVRK
+  version: "1.0.0"
+  homepage: "https://github.com/mavrkofficial/inkonchain-mcp"
+  network: "Ink mainnet (chain 57073)"
+credentials:
+  - name: EVM wallet key
+    description: "EVM private key in the OS keychain (set via `npx inkonchain-mcp-setup`) or the EVM_PRIVATE_KEY env var. The merchant side mostly calls read/settle facilitator tools; your receiving address goes in extra.seller. A key is only needed if your service also signs payments."
+    required: false
+    storage: keychain
+requires:
+  mcp: inkonchain
+  tools: [x402_router_info, x402_supported, x402_verify, x402_settle]
+  env: []
+  optionalEnv: [X402_FACILITATOR_URL]
 ---
 
 # Charge for a resource with x402 on Ink (merchant side)
@@ -97,6 +113,21 @@ Using the public facilitator + routers, the **protocol fee goes to the existing 
 3. Point clients at it via `X402_FACILITATOR_URL`, and use your router address as `payTo`.
 
 For most agents, the public rail is the right default — you only own the rail if fee capture matters.
+
+## Worked example — verify then settle a client's payment
+
+After you returned a 402 and the client retried with an `X-PAYMENT` header carrying the signed `paymentPayload`, run verify → settle. `x402_verify`/`x402_settle` return facilitator JSON (values illustrative).
+
+1. **Verify the signed payload before doing any work**
+   `x402_verify({ paymentPayload, paymentRequirements })`
+   → `{ "isValid": true }`
+   (Reject with another `402` if `isValid` is false, expired, or the amount/`asset`/`payTo` don't match.)
+
+2. **Settle onchain** (facilitator submits + sponsors gas; the net lands at `extra.seller`)
+   `x402_settle({ paymentPayload, paymentRequirements })`
+   → `{ "success": true, "txHash": "0x…" }`
+
+3. **Only after `success: true`**, return `200` with the resource — and echo the `txHash` in an `X-PAYMENT-RESPONSE` header.
 
 ## Gotchas
 

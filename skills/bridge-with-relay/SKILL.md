@@ -1,6 +1,22 @@
 ---
 name: bridge-with-relay
-description: Best-price token swap routing on Ink + cross-chain bridging across 60+ EVM chains, using Relay. Use when an agent needs the best route/quote for a token on Ink that ISN'T a Sentry-launched or Tsunami-native pair, to bridge ETH/tokens between chains, or to fund an Ink wallet from another chain.
+description: Best-price token swap routing on Ink + cross-chain bridging across 60+ EVM chains, using Relay. Use when an agent needs the best route/quote for a token on Ink that ISN'T a Sentry-launched or Tsunami-native pair, to bridge ETH/tokens between chains, or to fund an Ink wallet from another chain. Triggers include "bridge to Ink", "cross-chain swap", "best route", "fund Ink from Base", "best price for <token>".
+license: MIT
+metadata:
+  author: MAVRK
+  version: "1.0.0"
+  homepage: "https://github.com/mavrkofficial/inkonchain-mcp"
+  network: "Ink mainnet (chain 57073) + 60+ EVM chains via Relay"
+credentials:
+  - name: EVM wallet key
+    description: "EVM private key in the OS keychain (set via `npx inkonchain-mcp-setup`) or the EVM_PRIVATE_KEY env var. Required for write operations; read-only tools work without it. The same key signs on every EVM chain."
+    required: false
+    storage: keychain
+requires:
+  mcp: inkonchain
+  tools: [relay_get_chains, relay_get_currencies, relay_get_price, relay_get_quote, relay_execute, relay_get_requests]
+  env: []
+  optionalEnv: [EVM_RPC_OVERRIDES]
 ---
 
 # Best-price routing + bridging with Relay
@@ -55,6 +71,24 @@ Ink `57073` · Ethereum `1` · Base `8453` · Arbitrum `42161` · Optimism `10` 
 ## Same-chain (Ink) best-route swap
 
 `relay_execute` with `originChainId === destinationChainId === 57073` does a same-chain swap on Ink, routed for best price. Use it for any Ink token that isn't a Sentry-launched or Tsunami-native pair (e.g. **ETH ↔ USDT0**, or any aggregator-listed token). Quote with `relay_get_quote`/`relay_get_price` (both chain IDs `57073`) first to compare the route.
+
+## Worked example — bridge 0.01 ETH from Base to Ink
+
+Field values illustrative. `relay_execute`'s field names are verified; `relay_get_price` is a Relay API passthrough (shape representative). Native gas token = the zero address; `amount` in wei.
+
+1. **Estimate**
+   `relay_get_price({ originChainId: 8453, destinationChainId: 57073, originCurrency: "0x0000000000000000000000000000000000000000", destinationCurrency: "0x0000000000000000000000000000000000000000", amount: "10000000000000000" })`
+   → `{ "currencyIn": { … }, "currencyOut": { "amount": "9970000000000000" }, "totalImpact": { "percent": "-0.3" }, "fees": { … } }`  (representative)
+
+2. **Execute** (signs + submits every step with your key on the origin chain)
+   `relay_execute({ originChainId: 8453, destinationChainId: 57073, originCurrency: "0x0000000000000000000000000000000000000000", destinationCurrency: "0x0000000000000000000000000000000000000000", amount: "10000000000000000", slippageBps: 100 })`
+   → `{ "success": true, "requestId": "0x…", "txs": [{ "stepId": "deposit", "chainId": 8453, "hash": "0x…", "status": "success" }], "currencyIn": { … }, "currencyOut": { … }, "rate": "0.997", "totalImpact": { … }, "fees": { … }, "explorer": "https://explorer.inkonchain.com/tx/0x…", "statusCheck": "https://api.relay.link/intents/status?requestId=0x…" }`
+
+3. **Track**
+   `relay_get_requests({ hash: "0x…" })` → confirms the destination leg completed.
+
+**Same-chain Ink swap** (e.g. ETH → USDT0): set both chain IDs to `57073` —
+`relay_execute({ originChainId: 57073, destinationChainId: 57073, originCurrency: "0x0000000000000000000000000000000000000000", destinationCurrency: "0x0200c29006150606b650577bbe7b6248f58470c1", amount: "10000000000000000", slippageBps: 100 })`
 
 ## Gotchas
 

@@ -1,6 +1,22 @@
 ---
 name: daily-gm
-description: Maintain a daily GM streak and engagement on Ink across the DailyGM, DailyAgentGM, and DailyGMPlus contracts. Use when an agent wants to say GM (free or premium), send GM to another wallet/.ink name, check cooldowns, or run a daily engagement tick.
+description: Maintain a daily GM streak and engagement on Ink across the DailyGM, DailyAgentGM, and DailyGMPlus contracts. Use when an agent wants to say GM (free or premium), send GM to another wallet/.ink name, check cooldowns, or run a daily engagement tick. Triggers include "say GM", "gm", "send a GM", "keep my streak", "daily engagement tick", "GM plus".
+license: MIT
+metadata:
+  author: MAVRK
+  version: "1.0.0"
+  homepage: "https://github.com/mavrkofficial/inkonchain-mcp"
+  network: "Ink mainnet (chain 57073)"
+credentials:
+  - name: EVM wallet key
+    description: "EVM private key in the OS keychain (set via `npx inkonchain-mcp-setup`) or the EVM_PRIVATE_KEY env var. Required for GM writes; status/cooldown reads work without it."
+    required: false
+    storage: keychain
+requires:
+  mcp: inkonchain
+  tools: [dailygm_status, dailygm_gm, dailygm_gm_to, dailygm_agent_gm, dailygm_agent_gm_to, dailygm_plus_gm, dailygm_plus_gm_to, dailygm_plus_agent_gm, dailygm_plus_agent_gm_to, dailygm_agent_is_registered, dailygm_plus_fee]
+  env: []
+  optionalEnv: [DAILYGM_PLUS_MAX_DAILY_SPEND_WEI]
 ---
 
 # Daily GM (gm.ink)
@@ -45,6 +61,22 @@ If your strategy calls for it, `dailygm_plus_gm` (2× raw total) or `dailygm_plu
 ## Safety: premium spend cap
 
 Set `DAILYGM_PLUS_MAX_DAILY_SPEND_WEI` (e.g. `5000000000000000` = 0.005 ETH/day = 10 premium calls) to cap premium spend per UTC day. The MCP refuses premium calls that would exceed it. The counter is process-local and resets on restart.
+
+## Worked example — a daily engagement tick
+
+`dailygm_status` is a composed snapshot (fields representative); `dailygm_gm`/`dailygm_gm_to` field names are verified. The GM+ fee shown (`500000000000000` = 0.0005 ETH) is the real constant.
+
+1. **Snapshot — start here**
+   `dailygm_status()`
+   → `{ "user": "0xA11ce…", "gmFeeWei": "500000000000000", "isRegisteredAgent": true, "dailyGM": { "ready": true }, "dailyAgentGM": { "ready": true }, "dailyGMPlus": { "ready": true } }`  (representative)
+
+2. **Keep the streak (free)** — only these build the multiplier
+   `dailygm_gm()`
+   → `{ "contract": "DailyGM", "function": "gm", "hash": "0x…", "status": "success", "sender": "0xA11ce…", "message": "GM! Recorded onchain via DailyGM." }`
+
+3. **Send GM to a `.ink` name** (resolved automatically; ENS rejected)
+   `dailygm_gm_to({ recipient: "deployerone.ink" })`
+   → `{ "contract": "DailyGM", "function": "gmTo", "hash": "0x…", "status": "success", "sender": "0xA11ce…", "recipient": "0xD0e…", "resolvedFrom": "deployerone.ink", "message": "GM sent to deployerone.ink (0xD0e…) via DailyGM!" }`
 
 ## Gotchas
 

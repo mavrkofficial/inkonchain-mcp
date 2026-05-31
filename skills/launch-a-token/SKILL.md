@@ -1,6 +1,21 @@
 ---
 name: launch-a-token
-description: Launch a token on Ink through the Sentry Launch Factory. Covers all four launch types (permissionless, agent, Kraken Verified, GoPumpMe), when to use each, base-asset choice (WETH vs USDT0), readiness checks, and what happens to the LP. Use whenever an agent or user wants to create/deploy a new token.
+description: Launch a token on Ink through the Sentry Launch Factory. Covers all four launch types (permissionless, agent, Kraken Verified, GoPumpMe), when to use each, base-asset choice (WETH vs USDT0), readiness checks, and what happens to the LP. Use whenever an agent or user wants to create/deploy a new token. Triggers include "launch a token", "deploy a coin", "create a token", "agent token", "Sentry launch".
+license: MIT
+metadata:
+  author: MAVRK
+  version: "1.0.0"
+  homepage: "https://github.com/mavrkofficial/inkonchain-mcp"
+  network: "Ink mainnet (chain 57073)"
+credentials:
+  - name: EVM wallet key
+    description: "EVM private key in the OS keychain (set via `npx inkonchain-mcp-setup`) or the EVM_PRIVATE_KEY env var. Required for write operations; read-only tools work without it."
+    required: false
+    storage: keychain
+requires:
+  mcp: inkonchain
+  tools: [sentry_get_agent_launch_readiness, sentry_launch, sentry_launch_agent, sentry_launch_agent_usdt0, sentry_launch_kraken_verified, sentry_launch_gopumpme, sentry_get_creator_nfts, sentry_get_token_by_nft, sentry_get_launch_type, sentry_get_supported_base_tokens]
+  env: []
 ---
 
 # Launch a token (Sentry Launch Factory)
@@ -51,6 +66,24 @@ Same shape, different tool:
 - `sentry_launch({ name, symbol, baseToken? })` — `baseToken` defaults to WETH.
 - `sentry_launch_kraken_verified({ name, symbol, baseToken? })` — caller must pass the registry `canLaunch` check.
 - `sentry_launch_gopumpme({ name, symbol, baseToken? })` — Kraken-verified deployer, open trading.
+
+## Worked example — agent USDT0 launch (the self-funding path)
+
+Requires an ERC-8004 identity ([`register-agent-identity`](../register-agent-identity/SKILL.md)) and a little ETH for gas. Field values illustrative; field names are real. Output below is trimmed to the key fields.
+
+1. **Confirm readiness**
+   `sentry_get_agent_launch_readiness()`
+   → `{ "wallet": "0xA11ce…", "baseSymbol": "USDT0", "hasIdentity": true, "ethBalanceFormatted": "0.02", "baseTokenSupported": true, "ready": true }`
+   (If `ready` is false, fix the failing field — usually `hasIdentity` or the ETH gas balance — before launching.)
+
+2. **Launch** (deploys the ERC-20 + USDT0 pool at the 1% tier + locked LP; auto-registers to the public indexer)
+   `sentry_launch_agent_usdt0({ name: "My Agent Coin", symbol: "MAC" })`
+   → `{ "hash": "0x…", "status": "success", "tokenAddress": "0xC0FFEE…", "tokenId": "111", "baseToken": "0x0200c29006150606b650577bbe7b6248f58470c1", "launchFunction": "launchAgent" }`
+
+3. **Verify**
+   `sentry_get_creator_nfts()` → `{ "creator": "0xA11ce…", "nfts": ["111"] }`
+   `sentry_get_token_by_nft({ tokenId: "111" })` → `{ "tokenId": "111", "tokenAddress": "0xC0FFEE…" }`
+   `sentry_get_launch_type({ tokenId: "111" })` → `{ "tokenId": "111", "creator": "0xA11ce…", "tokenAddress": "0xC0FFEE…", "isAgent": true, "isKrakenVerified": false, "isGoPumpMe": false }`
 
 ## Gotchas
 

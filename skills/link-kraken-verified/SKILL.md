@@ -1,6 +1,21 @@
 ---
 name: link-kraken-verified
-description: Link a KYC'd Kraken exchange account to an Ink EVM address ("Kraken Verified") and understand what it unlocks — the Kraken-Verified launch paths (sentry_launch_kraken_verified, sentry_launch_gopumpme) and verified-only token trading. Use when a user or operator wants to become Kraken Verified on Ink, or to understand how verification differs from ERC-8004 agent identity.
+description: Link a KYC'd Kraken exchange account to an Ink EVM address ("Kraken Verified") and understand what it unlocks — the Kraken-Verified launch paths (sentry_launch_kraken_verified, sentry_launch_gopumpme) and verified-only token trading. Use when a user or operator wants to become Kraken Verified on Ink, or to understand how verification differs from ERC-8004 agent identity. Triggers include "Kraken Verified", "link my Kraken account", "KYC launch", "verified-only token", "inkonchain verify".
+license: MIT
+metadata:
+  author: MAVRK
+  version: "1.0.0"
+  homepage: "https://github.com/mavrkofficial/inkonchain-mcp"
+  network: "Ink mainnet (chain 57073)"
+credentials:
+  - name: EVM wallet key
+    description: "EVM private key in the OS keychain (set via `npx inkonchain-mcp-setup`) or the EVM_PRIVATE_KEY env var. Required for write operations; read-only tools work without it. The configured address must be the one linked at inkonchain.com/verify."
+    required: false
+    storage: keychain
+requires:
+  mcp: inkonchain
+  tools: [sentry_get_factory_config, sentry_launch_kraken_verified, sentry_launch_gopumpme]
+  env: []
 ---
 
 # Link a Kraken Verified account to Ink
@@ -41,6 +56,21 @@ You can read the registry the factory points at with `sentry_get_factory_config`
 ## Pairing with kraken-cli
 
 For the exchange side of the same Kraken account, see [`kraken-cli`](https://github.com/krakenfx/kraken-cli) — Kraken's AI-native trading CLI with its own MCP server (spot, futures, xStocks, forex). Same Kraken account, two surfaces: CEX trading via kraken-cli, onchain verified launches via `inkonchain-mcp`.
+
+## Worked example — confirm the registry, then launch verified
+
+Verification itself happens on the website (no MCP tool performs KYC); the MCP only reads/uses the resulting onchain status. Field values illustrative; field names are real.
+
+1. **See which registry the factory checks**
+   `sentry_get_factory_config()`
+   → `{ "factory": "0xDc37e11B68052d1539fa23386eE58Ac444bf5BE1", "krakenVerifiedRegistry": "0x54C3405f388E1d9DFbF69e43330F9F73B8EfdB32", "identityRegistry": "0x7274e874CA62410a93Bd8bf61c69d8045E399c02", "supportedBaseTokens": ["0x4200…0006", "0x0200…c1"] }`
+
+2. **Link your address** at [inkonchain.com/verify](https://inkonchain.com/verify) — Kraken sign-in, then connect the exact Ink address whose key is configured in the MCP.
+
+3. **Launch from the now-verified wallet** — e.g. GoPumpMe (open trading, 100% of WETH-side fees to you):
+   `sentry_launch_gopumpme({ name: "Verified Coin", symbol: "VCOIN" })`
+   → `{ "hash": "0x…", "status": "success", "tokenAddress": "0x…", "tokenId": "112", "baseToken": "0x4200000000000000000000000000000000000006", "launchFunction": "launchGoPumpMe" }`
+   (An unverified caller reverts the registry `canLaunch` check.)
 
 ## Gotchas
 

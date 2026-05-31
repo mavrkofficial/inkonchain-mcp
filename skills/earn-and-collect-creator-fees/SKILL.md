@@ -1,6 +1,21 @@
 ---
 name: earn-and-collect-creator-fees
-description: Understand how creator trading fees work for Sentry-launched tokens — how fees route to the creator, how to check accrued/uncollected amounts, and who can trigger collection (the factory owner OR the token's creator). Use when an agent or user wants to see, collect, or reason about the trading-fee revenue from tokens they launched, or how an agent self-funds from its token economy.
+description: Understand how creator trading fees work for Sentry-launched tokens — how fees route to the creator, how to check accrued/uncollected amounts, and who can trigger collection (the factory owner OR the token's creator). Use when an agent or user wants to see, collect, or reason about the trading-fee revenue from tokens they launched, or how an agent self-funds from its token economy. Triggers include "collect my fees", "creator fees", "how much have I earned", "claim trading fees", "agent self-funding".
+license: MIT
+metadata:
+  author: MAVRK
+  version: "1.0.0"
+  homepage: "https://github.com/mavrkofficial/inkonchain-mcp"
+  network: "Ink mainnet (chain 57073)"
+credentials:
+  - name: EVM wallet key
+    description: "EVM private key in the OS keychain (set via `npx inkonchain-mcp-setup`) or the EVM_PRIVATE_KEY env var. Required for write operations; read-only tools work without it."
+    required: false
+    storage: keychain
+requires:
+  mcp: inkonchain
+  tools: [sentry_get_creator_nfts, sentry_get_creator_fee_status, sentry_collect_fees, erc20_balance, analytics_creator_dashboard]
+  env: []
 ---
 
 # Earn (and get paid) creator fees
@@ -62,6 +77,26 @@ Either way, routing is identical: creator share → creator, remainder → treas
 ### 4. Confirm payout
 
 `erc20_balance({ token: "0x0200c29006150606b650577bbe7b6248f58470c1" })` (USDT0 markets) → confirm your balance increased. Then `analytics_creator_dashboard({ creator })` to see your paid-out total over time.
+
+## Worked example — collect your own USDT0 creator fees
+
+Field values illustrative; field names match the real tool output.
+
+1. **Find your positions**
+   `sentry_get_creator_nfts()` → `{ "creator": "0xA11ce…", "nfts": ["111", "110"] }`
+
+2. **See what's accrued** (per-NFT uncollected counters)
+   `sentry_get_creator_fee_status()`
+   → `{ "creator": "0xA11ce…", "count": 2, "positions": [{ "tokenId": "111", "tokenAddress": "0xC0FFEE…", "isAgent": true, "fee": 10000, "tokensOwed0": "0", "tokensOwed1": "4200000" }] }`
+   (`tokensOwed1` is the USDT0 base side here — `4200000` = 4.20 USDT0 at 6 decimals.)
+
+3. **Collect** (pass only IDs you created; you pay the gas; chunk to ~10 IDs/call for big batches)
+   `sentry_collect_fees({ tokenIds: ["111", "110"] })`
+   → `{ "hash": "0x…", "status": "success", "tokenIds": ["111", "110"] }`
+
+4. **Confirm the payout landed**
+   `erc20_balance({ token: "0x0200c29006150606b650577bbe7b6248f58470c1" })`
+   → `{ "balance": "4200000", "decimals": 6, "symbol": "USDT0", "formatted": "4.2", "owner": "0xA11ce…" }`
 
 ## Gotchas
 

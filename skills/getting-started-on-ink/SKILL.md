@@ -1,6 +1,21 @@
 ---
 name: getting-started-on-ink
-description: Set up and orient an agent wallet on Ink — create or load a wallet, check ETH gas and token balances, and acquire ETH/USDT0 to start transacting. Use this first, before any other Ink skill, whenever an agent has no wallet, no gas, or is unsure of its onchain state.
+description: Set up and orient an agent wallet on Ink — create or load a wallet, check ETH gas and token balances, and acquire ETH/USDT0 to start transacting. Use this first, before any other Ink skill, whenever an agent has no wallet, no gas, or is unsure of its onchain state. Triggers include "set up a wallet", "do I have a wallet", "check my balance", "fund my wallet", "get started on Ink".
+license: MIT
+metadata:
+  author: MAVRK
+  version: "1.0.0"
+  homepage: "https://github.com/mavrkofficial/inkonchain-mcp"
+  network: "Ink mainnet (chain 57073)"
+credentials:
+  - name: EVM wallet key
+    description: "EVM private key in the OS keychain (set via `npx inkonchain-mcp-setup`) or the EVM_PRIVATE_KEY env var. Required for write operations; read-only tools work without it."
+    required: false
+    storage: keychain
+requires:
+  mcp: inkonchain
+  tools: [wallet_address, wallet_create, erc20_balance, relay_execute]
+  env: []
 ---
 
 # Getting started on Ink
@@ -46,6 +61,27 @@ If ETH is `0`, you must get ETH onto Ink. Options:
 
 - **Bridge from another chain** you already hold funds on — see the [`bridge-with-relay`](../bridge-with-relay/SKILL.md) skill. Example: bridge Base ETH → Ink ETH with `relay_execute`.
 - **Swap on Ink** once you have some ETH: use `relay_execute` (good for ETH ↔ USDT0 where Tsunami liquidity is thin) or the [`trade-on-tsunami`](../trade-on-tsunami/SKILL.md) skill.
+
+## Worked example — check wallet, then fund if empty
+
+Field values are illustrative; field names match the real tool output.
+
+1. **Who am I / do I have gas?**
+   `wallet_address()`
+   → `{ "address": "0xA11ce…", "nativeBalanceWei": "0", "nativeBalanceEth": 0 }`
+   (Errors with `"No EVM private key found"` if no wallet exists → create one.)
+
+2. **Create a wallet (only if needed)**
+   `wallet_create()`
+   → `{ "created": true, "address": "0xA11ce…" }`
+
+3. **Check the agent base asset** (USDT0, 6 decimals)
+   `erc20_balance({ token: "0x0200c29006150606b650577bbe7b6248f58470c1" })`
+   → `{ "balance": "0", "decimals": 6, "symbol": "USDT0", "formatted": "0", "owner": "0xA11ce…" }`
+
+4. **Fund Ink with 0.01 ETH from Base** (origin must already hold ETH + gas; zero address = native ETH)
+   `relay_execute({ originChainId: 8453, destinationChainId: 57073, originCurrency: "0x0000000000000000000000000000000000000000", destinationCurrency: "0x0000000000000000000000000000000000000000", amount: "10000000000000000", slippageBps: 100 })`
+   → `{ "success": true, "requestId": "0x…", "txs": [{ "chainId": 8453, "hash": "0x…", "status": "success" }], "explorer": "https://explorer.inkonchain.com/tx/0x…" }`
 
 ## Gotchas
 

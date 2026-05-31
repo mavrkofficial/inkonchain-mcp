@@ -1,6 +1,21 @@
 ---
 name: safe-generic-contract-calls
-description: Read from and write to known Ink protocol contracts through a guarded, allowlisted interface when no dedicated tool exists. Use when you need a specific function on a supported contract (erc20, sentry, tsunami factory/pool/position manager/quoter/router, identity) that the higher-level tools don't expose.
+description: Read from and write to known Ink protocol contracts through a guarded, allowlisted interface when no dedicated tool exists. Use when you need a specific function on a supported contract (erc20, sentry, tsunami factory/pool/position manager/quoter/router, identity) that the higher-level tools don't expose. Triggers include "call a contract function", "contract_read", "contract_write", "raw read on <contract>", "no dedicated tool for this".
+license: MIT
+metadata:
+  author: MAVRK
+  version: "1.0.0"
+  homepage: "https://github.com/mavrkofficial/inkonchain-mcp"
+  network: "Ink mainnet (chain 57073)"
+credentials:
+  - name: EVM wallet key
+    description: "EVM private key in the OS keychain (set via `npx inkonchain-mcp-setup`) or the EVM_PRIVATE_KEY env var. Required for contract_write; contract_read works without it."
+    required: false
+    storage: keychain
+requires:
+  mcp: inkonchain
+  tools: [contract_read, contract_write]
+  env: []
 ---
 
 # Safe generic contract calls
@@ -36,6 +51,18 @@ description: Read from and write to known Ink protocol contracts through a guard
 `contract_write({ contractKey: "erc20", functionName: "approve", args: ["0x<spender>", "1000000"], address: "0x<token>" })`.
 
 `args` must be in **ABI order** and correct types (addresses as strings, uint as decimal strings).
+
+## Worked example — read a pool, then approve via the guarded interface
+
+Field values illustrative; field names match the real tool output. Prefer dedicated tools (`tsunami_*`, `erc20_approve`) when they exist — these are for gaps only.
+
+1. **Read** an allowlisted function (address override allowed for `tsunami_pool`)
+   `contract_read({ contractKey: "tsunami_pool", functionName: "slot0", address: "0x<pool>" })`
+   → `{ "contractKey": "tsunami_pool", "address": "0x<pool>", "functionName": "slot0", "result": ["<sqrtPriceX96>", 195120, "…"] }`
+
+2. **Write** an allowlisted function (`args` in ABI order; uint as decimal strings)
+   `contract_write({ contractKey: "erc20", functionName: "approve", args: ["0x<spender>", "1000000"], address: "0x<token>" })`
+   → `{ "contractKey": "erc20", "address": "0x<token>", "functionName": "approve", "hash": "0x…", "status": "success" }`
 
 ## Gotchas
 

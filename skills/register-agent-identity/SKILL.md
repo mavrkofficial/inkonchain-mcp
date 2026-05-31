@@ -1,6 +1,21 @@
 ---
 name: register-agent-identity
-description: Register an ERC-8004 onchain agent identity on Ink. Required before launching agent tokens via sentry_launch_agent / sentry_launch_agent_usdt0 and before using the agent-gated DailyAgentGM contracts. Use when an agent needs a verifiable onchain identity NFT.
+description: Register an ERC-8004 onchain agent identity on Ink. Required before launching agent tokens via sentry_launch_agent / sentry_launch_agent_usdt0 and before using the agent-gated DailyAgentGM contracts. Use when an agent needs a verifiable onchain identity NFT. Triggers include "register identity", "ERC-8004", "agent identity", "am I a registered agent", "mint identity NFT".
+license: MIT
+metadata:
+  author: MAVRK
+  version: "1.0.0"
+  homepage: "https://github.com/mavrkofficial/inkonchain-mcp"
+  network: "Ink mainnet (chain 57073)"
+credentials:
+  - name: EVM wallet key
+    description: "EVM private key in the OS keychain (set via `npx inkonchain-mcp-setup`) or the EVM_PRIVATE_KEY env var. Required for write operations; read-only tools work without it."
+    required: false
+    storage: keychain
+requires:
+  mcp: inkonchain
+  tools: [identity_check_registered, identity_register, identity_get_owner_agents, identity_get_agent, identity_set_agent_uri]
+  env: []
 ---
 
 # Register an ERC-8004 agent identity
@@ -38,6 +53,22 @@ The `agentURI` is built automatically as a base64 data URI from these fields —
 
 - `identity_get_owner_agents` → returns your agent token ID(s).
 - `identity_get_agent({ agentId })` → returns the decoded metadata.
+
+## Worked example — register an agent identity
+
+Field values are illustrative; field names match the real tool output.
+
+1. **Already registered? (idempotent)**
+   `identity_check_registered()`
+   → `{ "address": "0xA11ce…", "isRegistered": false, "identityCount": "0", "message": "Not registered. Call identity_register() first — required before sentry_launch_agent()." }`
+
+2. **Register** (mints the identity NFT — a write, costs gas)
+   `identity_register({ name: "my-trading-bot", description: "Autonomous Ink trading agent", metadata: [{ key: "domain", value: "mybot.ink" }, { key: "twitter", value: "@mybot" }] })`
+   → `{ "hash": "0x…", "status": "success", "agentId": "42", "agentURI": "data:application/json;base64,…", "registry": "0x7274e874CA62410a93Bd8bf61c69d8045E399c02", "message": "Agent identity #42 registered…" }`
+
+3. **Confirm**
+   `identity_get_owner_agents()` → `{ "address": "0xA11ce…", "agentIds": ["42"], "count": "1" }`
+   `identity_get_agent({ agentId: "42" })` → `{ "agentId": "42", "owner": "0xA11ce…", "agentURI": "data:…", "metadata": { "name": "my-trading-bot", "description": "Autonomous Ink trading agent", "domain": "mybot.ink" } }`
 
 ## Gotchas
 
