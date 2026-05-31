@@ -1,9 +1,10 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "inkonchain",
-  "description": "Claude Code plugin for the Ink blockchain (chain 57073) ecosystem — Sentry token launches, Tsunami V3 DEX, concentrated liquidity, ERC-8004 agent identity, x402 stablecoin payments, .ink domains, DailyGM, analytics, and Relay cross-chain bridging, all via the inkonchain-mcp server.",
   "owner": {
     "name": "MAVRK"
+  },
+  "metadata": {
+    "description": "Claude Code plugin for the Ink blockchain (chain 57073) ecosystem — Sentry token launches, Tsunami V3 DEX, concentrated liquidity, ERC-8004 agent identity, x402 stablecoin payments, .ink domains, DailyGM, analytics, and Relay cross-chain bridging, all via the inkonchain-mcp server."
   },
   "plugins": [
     {
