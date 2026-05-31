@@ -35,6 +35,7 @@ Want to contribute to `inkonchain-mcp` — add a protocol, a tool, or a skill? R
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [Use as a Claude Code Plugin](#use-as-a-claude-code-plugin)
 - [Tool Catalog](#tool-catalog)
 - [MCP Client Setup](#mcp-client-setup)
 - [Security & Key Management](#security--key-management)
@@ -94,6 +95,25 @@ If you have a private Ink RPC (Gelato, Alchemy, QuickNode, etc.), set it via the
   }
 }
 ```
+
+## Use as a Claude Code Plugin
+
+Beyond the raw MCP server, this repo doubles as a **single-plugin Claude Code marketplace**. Installing the plugin gives you the MCP tools **plus** a skill-router agent, slash commands, and all 14 playbook [skills](skills/) in one step.
+
+```bash
+# In Claude Code:
+/plugin marketplace add mavrkofficial/inkonchain-mcp
+/plugin install ink@inkonchain
+```
+
+Then store your key once (`npx inkonchain-mcp-setup`) and you're ready. The plugin adds:
+
+- **Agent** `ink-agent` — a skill router that activates on Ink requests and loads the right playbook before acting.
+- **Commands** — `/ink:launch-token`, `/ink:trade`, `/ink:bridge`, `/ink:gm`, `/ink:analytics`, `/ink:pay`.
+- **Skills** — the 14 operational playbooks (launch, trade, LP, identity, x402, GM, analytics, domains, …).
+- **MCP server** — the `inkonchain` server (~93 tools), wired automatically.
+
+The plugin's MCP server runs `npx -y inkonchain-mcp`, so it always uses the published package, and your key resolves from the OS keychain (or `EVM_PRIVATE_KEY`) exactly as in the standalone setup. On non-plugin clients (Cursor, Claude Desktop, …), add the `inkonchain` server from [MCP Client Setup](#mcp-client-setup) and use the [`skills/`](skills/) playbooks directly — they're portable Markdown.
 
 ## Tool Catalog
 

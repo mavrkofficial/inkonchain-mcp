@@ -57,3 +57,63 @@ These apply to every skill:
 | x402 USDT0 router | `0x0d1e92c107bB315e425278CD999D90be804F39d6` |
 
 > These mirror `src/config.ts`. If they ever drift, the config file is the source of truth.
+
+## Skill file format & frontmatter (for contributors)
+
+Every skill is a single `SKILL.md` = YAML frontmatter + a Markdown body. New or updated skills should match the schema below so they load cleanly in skill loaders and read consistently.
+
+### Frontmatter schema
+
+| Field | Required | Purpose |
+|---|---|---|
+| `name` | ✅ | Skill id; must equal the directory name (kebab-case). |
+| `description` | ✅ | One sentence on what it does + when to use it, then `Triggers include "…", "…"` discovery phrases. **Do not put a raw `: ` (colon-space) in this unquoted scalar** — it breaks YAML parsing. Write `Triggers include`, never `Triggers:`. |
+| `license` | recommended | SPDX id — `MIT` to match the package. |
+| `metadata.author` | recommended | `MAVRK`. |
+| `metadata.version` | recommended | Skill version, e.g. `"1.0.0"`. Bump on a material change. |
+| `metadata.homepage` | recommended | `https://github.com/mavrkofficial/inkonchain-mcp`. |
+| `metadata.network` | recommended | `"Ink mainnet (chain 57073)"`. |
+| `credentials[]` | when secrets are used | Declares each secret the skill needs: `{ name, description, required, storage }`. Use `storage: keychain` for the EVM key. |
+| `requires.mcp` | ✅ (tool skills) | The MCP server that provides the tools: `inkonchain`. |
+| `requires.tools[]` | ✅ (tool skills) | The exact MCP tool names this skill orchestrates. |
+| `requires.env[]` | ✅ | Required env vars — usually `[]` (the key lives in the OS keychain). |
+| `requires.optionalEnv[]` | optional | Override/optional env vars (e.g. `X402_FACILITATOR_URL`, `TSUNAMI_SUBGRAPH_URL`, `EVM_RPC_OVERRIDES`, `DAILYGM_PLUS_MAX_DAILY_SPEND_WEI`). |
+
+Extra keys beyond `name`/`description` are ignored by Claude/Cursor skill loaders, so this richer frontmatter stays fully loadable.
+
+### Template — copy this for a new skill
+
+```yaml
+---
+name: my-skill
+description: One line on what it does and when to use it. Triggers include "phrase a", "phrase b".
+license: MIT
+metadata:
+  author: MAVRK
+  version: "1.0.0"
+  homepage: "https://github.com/mavrkofficial/inkonchain-mcp"
+  network: "Ink mainnet (chain 57073)"
+credentials:
+  - name: EVM wallet key
+    description: "EVM private key in the OS keychain (set via `npx inkonchain-mcp-setup`) or the EVM_PRIVATE_KEY env var. Required for write operations; read-only tools work without it."
+    required: false
+    storage: keychain
+requires:
+  mcp: inkonchain
+  tools: [tool_a, tool_b]
+  env: []
+---
+```
+
+### Body convention
+
+Keep the body in this order so every skill reads the same way:
+
+1. **Intro** — one paragraph: what this is, when to reach for it, which venue/contract is involved.
+2. **Prerequisites** / **Tools used** — what must already be true; the tools, one line each.
+3. **Steps** — numbered, imperative; the happy path.
+4. **`## Worked example`** — a real call sequence with real Ink addresses, correct fee tiers + decimals, and **output shapes verified against `src/tools/*.ts`**. Label illustrative values as illustrative; field *names* must be real.
+5. **Gotchas** — the footguns (fee tiers, decimals, token ordering, revert conditions).
+6. **Done when** — the success check.
+
+Cross-link sibling skills with relative links (`[``register-agent-identity``](../register-agent-identity/SKILL.md)`). Amounts are always base units — see [Shared conventions](#shared-conventions-read-once).

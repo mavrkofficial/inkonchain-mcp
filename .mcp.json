@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "inkonchain": {
+      "command": "npx",
+      "args": ["-y", "inkonchain-mcp"]
+    }
+  }
+}

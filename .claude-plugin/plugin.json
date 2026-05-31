@@ -1,0 +1,12 @@
+{
+  "name": "ink",
+  "version": "1.0.0",
+  "description": "Operate on the Ink blockchain (chain 57073) via the inkonchain-mcp server — token launches, DEX trading, liquidity, agent identity, x402 payments, .ink domains, GM, analytics, and cross-chain bridging.",
+  "author": {
+    "name": "MAVRK"
+  },
+  "homepage": "https://github.com/mavrkofficial/inkonchain-mcp",
+  "repository": "https://github.com/mavrkofficial/inkonchain-mcp",
+  "license": "MIT",
+  "keywords": ["ink", "inkonchain", "defi", "sentry", "tsunami", "erc-8004", "zns", "x402", "dailygm", "relay", "mcp", "agent"]
+}

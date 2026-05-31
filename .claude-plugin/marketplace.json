@@ -1,0 +1,24 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "inkonchain",
+  "description": "Claude Code plugin for the Ink blockchain (chain 57073) ecosystem — Sentry token launches, Tsunami V3 DEX, concentrated liquidity, ERC-8004 agent identity, x402 stablecoin payments, .ink domains, DailyGM, analytics, and Relay cross-chain bridging, all via the inkonchain-mcp server.",
+  "owner": {
+    "name": "MAVRK"
+  },
+  "plugins": [
+    {
+      "name": "ink",
+      "source": "./",
+      "description": "Operate on Ink: launch tokens (Sentry), trade on Tsunami V3, provide liquidity, register an ERC-8004 identity, pay/charge with x402, manage .ink domains, keep GM streaks, read analytics, and bridge cross-chain with Relay. Bundles a skill-router agent, slash commands, 14 playbook skills, and the inkonchain MCP server.",
+      "version": "1.0.0",
+      "author": {
+        "name": "MAVRK"
+      },
+      "homepage": "https://github.com/mavrkofficial/inkonchain-mcp",
+      "repository": "https://github.com/mavrkofficial/inkonchain-mcp",
+      "license": "MIT",
+      "category": "tools",
+      "keywords": ["ink", "inkonchain", "defi", "sentry", "tsunami", "erc-8004", "zns", "x402", "dailygm", "relay", "agent"]
+    }
+  ]
+}
